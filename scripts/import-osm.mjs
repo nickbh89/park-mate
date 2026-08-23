@@ -39,11 +39,18 @@ const OPERATOR_MAP = [
   [/civil\s*enforcement/i, 'civil-enforcement'],
 ];
 
+// Overpass regexes are POSIX ERE — no \s, so spell the names out literally.
+const OVERPASS_OPERATOR_RE = [
+  'ParkingEye', 'Parking Eye', 'Euro Car Parks', 'APCOA', 'Smart Parking',
+  'UK Parking Control', 'UKPC', 'Horizon Parking', 'GroupNexus', 'CP Plus',
+  'National Parking Enforcement', 'Premier Park', 'Civil Enforcement',
+].join('|');
+
 const OVERPASS_QUERY = `
 [out:json][timeout:180];
 area["ISO3166-1"="GB"][admin_level=2]->.uk;
 (
-  nwr["amenity"="parking"]["operator"~"${OPERATOR_MAP.map(([re]) => re.source).join('|')}",i](area.uk);
+  nwr["amenity"="parking"]["operator"~"${OVERPASS_OPERATOR_RE}",i](area.uk);
 );
 out center tags;
 `;
@@ -136,7 +143,10 @@ async function fetchOverpass() {
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'ParkMate-DB-Import/1.0 (+https://github.com/nickbh89/park-mate)',
+        },
         body: 'data=' + encodeURIComponent(OVERPASS_QUERY),
       });
       if (!res.ok) throw new Error(`${endpoint} -> HTTP ${res.status}`);
