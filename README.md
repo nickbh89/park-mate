@@ -63,12 +63,38 @@ npm test              # pure-logic unit tests (node, no emulator needed)
   (your existing Tollmate tester list can be reused).
 - Version codes are single-use — bump `android.versionCode` every upload.
 
+## National coverage
+
+`scripts/import-osm.mjs` queries the Overpass API for every UK car park tagged
+in OpenStreetMap with a known enforcement operator (ParkingEye, Euro Car
+Parks, APCOA, Smart Parking, UKPC, Horizon, GroupNexus, NPE, Premier Park,
+Civil Enforcement), maps `maxstay`/`fee` tags to ParkMate site types, and
+merges the result with the hand-curated sites — curated entries always win,
+and OSM candidates within 150 m of one are dropped as duplicates.
+
+`.github/workflows/update-database.yml` reruns the import every Monday (and
+on demand from the Actions tab) and commits the refreshed database. Because
+`siteSync.js` points at this repo's raw `parkingSites.json`, installed apps
+pick up each refresh over the air — no app release needed.
+
+Run locally: `node scripts/import-osm.mjs` (`--dry-run` for stats only,
+`--test` for the offline fixture tests).
+
+Contains data © OpenStreetMap contributors, licensed under the
+[ODbL](https://www.openstreetmap.org/copyright). All imported entries are
+`verified: false` — on-site signage is authoritative.
+
+## Support
+
+If ParkMate saves you a parking charge, you can leave a tip:
+[ko-fi.com/nickbradshawhughes](https://ko-fi.com/nickbradshawhughes) — also
+linked from the app's Settings screen.
+
 ## Roadmap
 
-- [ ] Field-verify the seed sites (entrance-anchored geofences, like the
-      airport forecourt approach in Toll Mate)
-- [ ] National coverage via OSM import (`amenity=parking` + operator tags) with
-      a review queue
+- [ ] Field-verify seed sites (entrance-anchored geofences, like the airport
+      forecourt approach in Toll Mate)
+- [ ] Review queue / verification UI for imported OSM sites
 - [ ] Pay-and-display expiry logging UI (logic already in `planPaidExpiry`)
 - [ ] PCN appeal helper (grace period / signage / charge-cap grounds under the
       single Code of Practice)
