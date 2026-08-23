@@ -10,7 +10,8 @@ const OPS_KEY = 'parkmate:operators';
 
 // Point this at a raw GitHub URL (or your own endpoint) to ship data
 // updates without an app release.
-export const REMOTE_SITES_URL = null; // e.g. 'https://raw.githubusercontent.com/nickbh89/park-mate/main/src/data/parkingSites.json'
+export const REMOTE_SITES_URL =
+  'https://raw.githubusercontent.com/nickbh89/park-mate/main/src/data/parkingSites.json';
 
 export async function loadSites() {
   const cached = await readJson(SITES_KEY);
