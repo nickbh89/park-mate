@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "ParkMate",
+    "slug": "parkmate",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0e1726",
+    "android": {
+      "package": "com.parkmate.app",
+      "versionCode": 1,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "POST_NOTIFICATIONS"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "ParkMate uses your location to detect privately enforced car parks and warn you before parking charges.",
+          "isAndroidBackgroundLocationEnabled": false
+        }
+      ],
+      ["expo-notifications", {}]
+    ]
+  }
+}
