@@ -1,0 +1,37 @@
+name: Update parking site database
+
+on:
+  schedule:
+    - cron: '17 4 * * 1' # Mondays 04:17 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run import pipeline tests
+        run: node scripts/import-osm.mjs --test
+
+      - name: Import UK sites from OpenStreetMap
+        run: node scripts/import-osm.mjs
+
+      - name: Commit updated database
+        run: |
+          git config user.name "parkmate-bot"
+          git config user.email "actions@github.com"
+          if git diff --quiet -- src/data/parkingSites.json; then
+            echo "No database changes."
+          else
+            git add src/data/parkingSites.json
+            git commit -m "Update national site database from OSM import [skip ci]"
+            git push
+          fi
