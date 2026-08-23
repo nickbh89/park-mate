@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView, Linking } from 'react-native';
+
+export const KOFI_URL = 'https://ko-fi.com/nickbradshawhughes';
 
 const LEAD_OPTIONS = [10, 15, 20, 30];
 
@@ -44,6 +46,14 @@ export default function SettingsScreen({ settings, onChange, onBack }) {
         />
       </View>
 
+      <TouchableOpacity
+        style={styles.tipBtn}
+        onPress={() => Linking.openURL(KOFI_URL).catch(() => {})}
+      >
+        <Text style={styles.tipTitle}>☕ Enjoying ParkMate?</Text>
+        <Text style={styles.tipSub}>Leave a tip on Ko-fi to support development</Text>
+      </TouchableOpacity>
+
       <Text style={styles.footer}>
         ParkMate alerts are reminders, not legal advice. The signage at each
         site is the binding record of its terms — always check it. Site data
@@ -65,5 +75,8 @@ const styles = StyleSheet.create({
   leadBtnActive: { backgroundColor: '#22c55e' },
   leadText: { color: '#94a3b8', fontWeight: '600' },
   leadTextActive: { color: '#052e16' },
+  tipBtn: { backgroundColor: '#16233a', borderRadius: 12, padding: 16, marginTop: 4 },
+  tipTitle: { color: '#e2e8f0', fontSize: 16, fontWeight: '700' },
+  tipSub: { color: '#94a3b8', fontSize: 13, marginTop: 4 },
   footer: { color: '#475569', fontSize: 12, lineHeight: 18, marginTop: 20 },
 });
