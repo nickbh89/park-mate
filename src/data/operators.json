@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "effectiveDate": "2026-08-23",
+  "notes": "Major UK private (non-council) parking operators that issue Parking Charge Notices via DVLA keeper data. Accreditation: BPA = British Parking Association AOS, IPC = International Parking Community. Both now operate under the single Private Parking Code of Practice.",
+  "operators": [
+    {
+      "id": "parkingeye",
+      "name": "ParkingEye Ltd",
+      "accreditation": "BPA",
+      "hq": "Chorley, Lancashire",
+      "scale": "Largest UK private operator — 4,000+ managed sites, ANPR-led",
+      "typicalSectors": ["supermarkets (Aldi ~550 sites)", "retail parks", "hospitals", "hotels", "fast food"],
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "Most commonly encountered operator; almost always ANPR entry/exit cameras with max-stay limits."
+    },
+    {
+      "id": "euro-car-parks",
+      "name": "Euro Car Parks Ltd",
+      "accreditation": "BPA",
+      "hq": "London",
+      "scale": "One of the largest — city centre, retail and leisure sites since 1976",
+      "typicalSectors": ["city centre pay & display", "retail parks", "leisure", "supermarkets"],
+      "enforcementMethod": "ANPR + warden",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "Mix of pay-to-park and free max-stay retail sites."
+    },
+    {
+      "id": "apcoa",
+      "name": "APCOA Parking (UK) Ltd",
+      "accreditation": "BPA",
+      "hq": "Uxbridge",
+      "scale": "Europe's largest parking operator; UK airports, rail, hospitals, council contracts",
+      "typicalSectors": ["airports", "railway stations", "hospitals", "city car parks"],
+      "enforcementMethod": "ANPR + warden",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "Also runs many rail station car parks where PCNs are issued under byelaws — different appeal route."
+    },
+    {
+      "id": "smart-parking",
+      "name": "Smart Parking Ltd",
+      "accreditation": "BPA",
+      "hq": "Birmingham",
+      "scale": "ANPR specialist, hundreds of retail/leisure sites",
+      "typicalSectors": ["retail parks", "small private car parks", "leisure"],
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "High PCN issue volumes relative to estate size."
+    },
+    {
+      "id": "ukpc",
+      "name": "UK Parking Control Ltd (UKPC)",
+      "accreditation": "BPA",
+      "hq": "Bracknell",
+      "scale": "Large national operator",
+      "typicalSectors": ["retail parks", "residential", "business parks"],
+      "enforcementMethod": "ANPR + warden",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": ""
+    },
+    {
+      "id": "horizon",
+      "name": "Horizon Parking Ltd",
+      "accreditation": "BPA",
+      "hq": "Chelmsford",
+      "scale": "National",
+      "typicalSectors": ["supermarkets (many Tesco sites)", "retail"],
+      "enforcementMethod": "ANPR + warden",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 70,
+      "notes": ""
+    },
+    {
+      "id": "groupnexus",
+      "name": "GroupNexus (formerly ParkingEye rival CP Plus)",
+      "accreditation": "BPA",
+      "hq": "London",
+      "scale": "National",
+      "typicalSectors": ["motorway services", "retail", "healthcare"],
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "Operates many motorway service area max-stay (usually 2h free) sites."
+    },
+    {
+      "id": "npe",
+      "name": "National Parking Enforcement Ltd",
+      "accreditation": "IPC",
+      "hq": "UK",
+      "scale": "Mid-size",
+      "typicalSectors": ["retail", "private land"],
+      "enforcementMethod": "ANPR + warden",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": ""
+    },
+    {
+      "id": "premier-park",
+      "name": "Premier Park Ltd",
+      "accreditation": "BPA",
+      "hq": "Exeter",
+      "scale": "Mid-size national",
+      "typicalSectors": ["retail", "residential", "seafront car parks"],
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": ""
+    },
+    {
+      "id": "civil-enforcement",
+      "name": "Civil Enforcement Ltd",
+      "accreditation": "BPA",
+      "hq": "Liverpool",
+      "scale": "Large ANPR operator",
+      "typicalSectors": ["pubs", "hotels", "retail"],
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "Liverpool-based; frequent issuer in the North West."
+    }
+  ],
+  "codeOfPractice": {
+    "name": "Private Parking Single Code of Practice (Parking (Code of Practice) Act 2019)",
+    "considerationPeriodMinutes": 5,
+    "gracePeriodMinutes": 10,
+    "chargeCapsGBP": { "standardOutsideLondon": 50, "seriousOutsideLondon": 80, "standardLondon": 80, "seriousLondon": 130 },
+    "notes": "5-min consideration period on arrival before any charge; 10-min grace period after paid/free time expires. Phased implementation from 2024-2026."
+  }
+}
