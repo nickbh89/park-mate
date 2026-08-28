@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "effectiveDate": "2026-08-23",
+  "effectiveDate": "2026-08-28",
   "notes": "Major UK private (non-council) parking operators that issue Parking Charge Notices via DVLA keeper data. Accreditation: BPA = British Parking Association AOS, IPC = International Parking Community. Both now operate under the single Private Parking Code of Practice.",
   "operators": [
     {
@@ -8,8 +8,14 @@
       "name": "ParkingEye Ltd",
       "accreditation": "BPA",
       "hq": "Chorley, Lancashire",
-      "scale": "Largest UK private operator — 4,000+ managed sites, ANPR-led",
-      "typicalSectors": ["supermarkets (Aldi ~550 sites)", "retail parks", "hospitals", "hotels", "fast food"],
+      "scale": "Largest UK private operator \u2014 4,000+ managed sites, ANPR-led",
+      "typicalSectors": [
+        "supermarkets (Aldi ~550 sites)",
+        "retail parks",
+        "hospitals",
+        "hotels",
+        "fast food"
+      ],
       "enforcementMethod": "ANPR",
       "appealsService": "POPLA",
       "typicalChargeGBP": 100,
@@ -20,8 +26,13 @@
       "name": "Euro Car Parks Ltd",
       "accreditation": "BPA",
       "hq": "London",
-      "scale": "One of the largest — city centre, retail and leisure sites since 1976",
-      "typicalSectors": ["city centre pay & display", "retail parks", "leisure", "supermarkets"],
+      "scale": "One of the largest \u2014 city centre, retail and leisure sites since 1976",
+      "typicalSectors": [
+        "city centre pay & display",
+        "retail parks",
+        "leisure",
+        "supermarkets"
+      ],
       "enforcementMethod": "ANPR + warden",
       "appealsService": "POPLA",
       "typicalChargeGBP": 100,
@@ -33,11 +44,16 @@
       "accreditation": "BPA",
       "hq": "Uxbridge",
       "scale": "Europe's largest parking operator; UK airports, rail, hospitals, council contracts",
-      "typicalSectors": ["airports", "railway stations", "hospitals", "city car parks"],
+      "typicalSectors": [
+        "airports",
+        "railway stations",
+        "hospitals",
+        "city car parks"
+      ],
       "enforcementMethod": "ANPR + warden",
       "appealsService": "POPLA",
       "typicalChargeGBP": 100,
-      "notes": "Also runs many rail station car parks where PCNs are issued under byelaws — different appeal route."
+      "notes": "Also runs many rail station car parks where PCNs are issued under byelaws \u2014 different appeal route."
     },
     {
       "id": "smart-parking",
@@ -45,7 +61,11 @@
       "accreditation": "BPA",
       "hq": "Birmingham",
       "scale": "ANPR specialist, hundreds of retail/leisure sites",
-      "typicalSectors": ["retail parks", "small private car parks", "leisure"],
+      "typicalSectors": [
+        "retail parks",
+        "small private car parks",
+        "leisure"
+      ],
       "enforcementMethod": "ANPR",
       "appealsService": "POPLA",
       "typicalChargeGBP": 100,
@@ -57,7 +77,11 @@
       "accreditation": "BPA",
       "hq": "Bracknell",
       "scale": "Large national operator",
-      "typicalSectors": ["retail parks", "residential", "business parks"],
+      "typicalSectors": [
+        "retail parks",
+        "residential",
+        "business parks"
+      ],
       "enforcementMethod": "ANPR + warden",
       "appealsService": "POPLA",
       "typicalChargeGBP": 100,
@@ -69,7 +93,10 @@
       "accreditation": "BPA",
       "hq": "Chelmsford",
       "scale": "National",
-      "typicalSectors": ["supermarkets (many Tesco sites)", "retail"],
+      "typicalSectors": [
+        "supermarkets (many Tesco sites)",
+        "retail"
+      ],
       "enforcementMethod": "ANPR + warden",
       "appealsService": "POPLA",
       "typicalChargeGBP": 70,
@@ -81,7 +108,11 @@
       "accreditation": "BPA",
       "hq": "London",
       "scale": "National",
-      "typicalSectors": ["motorway services", "retail", "healthcare"],
+      "typicalSectors": [
+        "motorway services",
+        "retail",
+        "healthcare"
+      ],
       "enforcementMethod": "ANPR",
       "appealsService": "POPLA",
       "typicalChargeGBP": 100,
@@ -93,7 +124,10 @@
       "accreditation": "IPC",
       "hq": "UK",
       "scale": "Mid-size",
-      "typicalSectors": ["retail", "private land"],
+      "typicalSectors": [
+        "retail",
+        "private land"
+      ],
       "enforcementMethod": "ANPR + warden",
       "appealsService": "IAS",
       "typicalChargeGBP": 100,
@@ -105,7 +139,11 @@
       "accreditation": "BPA",
       "hq": "Exeter",
       "scale": "Mid-size national",
-      "typicalSectors": ["retail", "residential", "seafront car parks"],
+      "typicalSectors": [
+        "retail",
+        "residential",
+        "seafront car parks"
+      ],
       "enforcementMethod": "ANPR",
       "appealsService": "POPLA",
       "typicalChargeGBP": 100,
@@ -117,18 +155,315 @@
       "accreditation": "BPA",
       "hq": "Liverpool",
       "scale": "Large ANPR operator",
-      "typicalSectors": ["pubs", "hotels", "retail"],
+      "typicalSectors": [
+        "pubs",
+        "hotels",
+        "retail"
+      ],
       "enforcementMethod": "ANPR",
       "appealsService": "POPLA",
       "typicalChargeGBP": 100,
       "notes": "Liverpool-based; frequent issuer in the North West."
+    },
+    {
+      "id": "ncp",
+      "name": "NCP (National Car Parks)",
+      "accreditation": "BPA",
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "Largest commercial car park owner-operator; also runs many council-owned car parks under contract"
+    },
+    {
+      "id": "q-park",
+      "name": "Q-Park UK",
+      "accreditation": "BPA",
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "European operator of city-centre multi-storeys, incl. council-owned sites under contract"
+    },
+    {
+      "id": "saba",
+      "name": "Saba Park Solutions UK",
+      "accreditation": "BPA",
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "Operates many council and rail-station car parks under contract"
+    },
+    {
+      "id": "indigo",
+      "name": "Indigo Park Solutions UK",
+      "accreditation": "BPA",
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "Operates hospital, rail and council car parks under contract"
+    },
+    {
+      "id": "nsl",
+      "name": "NSL Ltd",
+      "accreditation": "BPA",
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "Major enforcement contractor for local authorities"
+    },
+    {
+      "id": "britannia",
+      "name": "Britannia Parking Group",
+      "accreditation": "BPA",
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "Retail and city sites, south of England focus"
+    },
+    {
+      "id": "excel-parking",
+      "name": "Excel Parking Services",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "Retail and leisure sites, ANPR-led"
+    },
+    {
+      "id": "met-parking",
+      "name": "MET Parking Services",
+      "accreditation": "BPA",
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator; manages many McDonald's and retail sites"
+    },
+    {
+      "id": "minster-baywatch",
+      "name": "Minster Baywatch",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "Yorkshire-based ANPR operator"
+    },
+    {
+      "id": "local-parking-security",
+      "name": "Local Parking Security Ltd",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR and patrol operator"
+    },
+    {
+      "id": "one-parking-solution",
+      "name": "One Parking Solution",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "Small ANPR operator, south coast"
+    },
+    {
+      "id": "initial-parking",
+      "name": "Initial Parking",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator"
+    },
+    {
+      "id": "carflow",
+      "name": "Carflow Ltd",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator"
+    },
+    {
+      "id": "creative-car-park",
+      "name": "Creative Car Park Ltd",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator, retail sites"
+    },
+    {
+      "id": "athena",
+      "name": "Athena ANPR Ltd",
+      "accreditation": "BPA",
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator; manages many Lidl store car parks"
+    },
+    {
+      "id": "vcs",
+      "name": "Vehicle Control Services (VCS)",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "Sheffield-based operator, airports and retail"
+    },
+    {
+      "id": "pcm",
+      "name": "Parking Control Management (UK)",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "Patrol and ANPR operator, residential and commercial"
+    },
+    {
+      "id": "g24",
+      "name": "G24 Ltd",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator, retail parks"
+    },
+    {
+      "id": "district-enforcement",
+      "name": "District Enforcement",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator, land and retail"
+    },
+    {
+      "id": "es-parking",
+      "name": "ES Parking Enforcement",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "North-west England ANPR operator"
+    },
+    {
+      "id": "p4-parking",
+      "name": "P4 Parking",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator"
+    },
+    {
+      "id": "park-watch",
+      "name": "Park Watch (Defence Systems)",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator"
+    },
+    {
+      "id": "highview",
+      "name": "Highview Parking",
+      "accreditation": "BPA",
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator, retail parks"
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini Parking Solutions",
+      "accreditation": "BPA",
+      "enforcementMethod": "ANPR",
+      "appealsService": "POPLA",
+      "typicalChargeGBP": 100,
+      "notes": "London-based ANPR and patrol operator"
+    },
+    {
+      "id": "total-parking",
+      "name": "Total Parking Solutions",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator"
+    },
+    {
+      "id": "secure-parking",
+      "name": "Secure Parking Solutions",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator"
+    },
+    {
+      "id": "flashpark",
+      "name": "FlashPark",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "Self-service enforcement scheme"
+    },
+    {
+      "id": "spring-parking",
+      "name": "Spring Parking Ltd",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator"
+    },
+    {
+      "id": "rcp-parking",
+      "name": "RCP Parking Ltd",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator"
+    },
+    {
+      "id": "select-parking",
+      "name": "Select Parking",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator"
+    },
+    {
+      "id": "new-generation-parking",
+      "name": "New Generation Parking Management",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "Cardiff-based ANPR operator"
+    },
+    {
+      "id": "ukcps",
+      "name": "UKCPS (UK Car Park Solutions)",
+      "accreditation": "IPC",
+      "enforcementMethod": "ANPR",
+      "appealsService": "IAS",
+      "typicalChargeGBP": 100,
+      "notes": "ANPR operator; runs Eddisbury Square, Frodsham"
     }
   ],
   "codeOfPractice": {
     "name": "Private Parking Single Code of Practice (Parking (Code of Practice) Act 2019)",
     "considerationPeriodMinutes": 5,
     "gracePeriodMinutes": 10,
-    "chargeCapsGBP": { "standardOutsideLondon": 50, "seriousOutsideLondon": 80, "standardLondon": 80, "seriousLondon": 130 },
+    "chargeCapsGBP": {
+      "standardOutsideLondon": 50,
+      "seriousOutsideLondon": 80,
+      "standardLondon": 80,
+      "seriousLondon": 130
+    },
     "notes": "5-min consideration period on arrival before any charge; 10-min grace period after paid/free time expires. Phased implementation from 2024-2026."
   }
 }

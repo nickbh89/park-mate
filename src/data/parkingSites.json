@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "effectiveDate": "2026-08-23",
+  "effectiveDate": "2026-08-28",
   "region": "United Kingdom (curated + OSM import)",
   "disclaimer": "Seed data compiled by research, not survey. Coordinates are approximate site centroids and operator attributions / max-stay values reflect commonly reported terms which change without notice. Every entry MUST be field-verified (signage is the legal source of truth) before public release. verified:false marks unsurveyed entries.",
   "defaults": {
@@ -23,6 +23,20 @@
       "confidence": "medium",
       "verified": false,
       "notes": "Aldi sites nationally managed by ParkingEye ANPR; typical 90-min customer limit."
+    },
+    {
+      "id": "eddisbury-square-frodsham",
+      "name": "Eddisbury Square (Frodsham)",
+      "town": "Frodsham",
+      "operatorId": "ukcps",
+      "lat": 53.2942,
+      "lng": -2.7238,
+      "radiusM": 80,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 120,
+      "confidence": "high",
+      "verified": false,
+      "notes": "UKCPS ANPR since 2014 - 2h max stay, no return within 2h, enforced 24h. 60 spaces."
     },
     {
       "id": "cheshire-oaks",
@@ -92,7 +106,7 @@
       "maxStayMinutes": null,
       "confidence": "medium",
       "verified": false,
-      "notes": "Hospital ANPR pay-on-exit — remind to pay before leaving, not to leave."
+      "notes": "Hospital ANPR pay-on-exit \u2014 remind to pay before leaving, not to leave."
     },
     {
       "id": "cockhedge-warrington",
@@ -344,7 +358,7 @@
       "maxStayMinutes": 120,
       "confidence": "medium",
       "verified": false,
-      "notes": "Motorway services — standard 2h free then charge; ANPR."
+      "notes": "Motorway services \u2014 standard 2h free then charge; ANPR."
     },
     {
       "id": "lymm-services",
@@ -6531,7 +6545,7 @@
       "notes": ""
     }
   ],
-  "attribution": "Contains data © OpenStreetMap contributors (ODbL). Operator attributions and stay terms are unverified — on-site signage is authoritative.",
+  "attribution": "Contains data \u00a9 OpenStreetMap contributors (ODbL). Operator attributions and stay terms are unverified \u2014 on-site signage is authoritative.",
   "stats": {
     "curated": 28,
     "osm": 383,
