@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Linking } from 'react-native';
 import { haversineM } from '../services/geofence';
 import { formatMins, fmtTime } from '../services/stayTimer';
 
@@ -13,6 +13,11 @@ export default function HomeScreen({
       .sort((a, b) => a.distM - b.distM)
       .slice(0, 8);
   }, [sites, lastFix]);
+
+  const navigateTo = (site) => {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${site.lat},${site.lng}`;
+    Linking.openURL(url).catch(() => {});
+  };
 
   return (
     <View style={styles.wrap}>
@@ -54,12 +59,12 @@ export default function HomeScreen({
         <Text style={styles.toggleText}>{monitoring ? 'Pause detection' : 'Start detection'}</Text>
       </TouchableOpacity>
 
-      <Text style={styles.sectionTitle}>Nearby enforced car parks</Text>
+      <Text style={styles.sectionTitle}>Nearby enforced car parks · tap to navigate</Text>
       <FlatList
         data={nearby}
         keyExtractor={(s) => s.id}
         renderItem={({ item }) => (
-          <View style={styles.siteRow}>
+          <TouchableOpacity style={styles.siteRow} onPress={() => navigateTo(item)}>
             <View style={{ flex: 1 }}>
               <Text style={styles.siteName}>{item.name}</Text>
               <Text style={styles.siteMeta}>
@@ -74,7 +79,8 @@ export default function HomeScreen({
                 {item.distM < 1000 ? `${Math.round(item.distM)} m` : `${(item.distM / 1609).toFixed(1)} mi`}
               </Text>
             )}
-          </View>
+            <Text style={styles.siteGo}>›</Text>
+          </TouchableOpacity>
         )}
       />
     </View>
@@ -125,4 +131,5 @@ const styles = StyleSheet.create({
   siteName: { color: '#e2e8f0', fontSize: 15, fontWeight: '600' },
   siteMeta: { color: '#64748b', fontSize: 12, marginTop: 2 },
   siteDist: { color: '#94a3b8', fontSize: 13, marginLeft: 10 },
+  siteGo: { color: '#475569', fontSize: 22, marginLeft: 10, marginTop: -2 },
 });
