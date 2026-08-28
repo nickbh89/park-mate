@@ -29,6 +29,22 @@ const SITES_PATH = join(ROOT, 'src', 'data', 'parkingSites.json');
 const OVERPASS_ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+];
+
+// Querying one giant UK-wide area from CI runners gets 504/502 (shared IPs,
+// heavy query). Tile the coverage into bboxes instead — each tile is a cheap
+// query that reliably gets a slot. Tiles cover GB, NI, IoM, Jersey & Guernsey.
+// (south, west, north, east)
+const TILES = [
+  [49.0, -3.0, 50.5, 2.0],   // Channel Islands + south coast
+  [50.5, -6.5, 52.0, 2.0],   // SW + southern England
+  [52.0, -5.5, 53.5, 2.0],   // Wales + Midlands + East Anglia
+  [53.5, -5.2, 55.0, 0.5],   // northern England + Isle of Man
+  [54.0, -8.3, 55.5, -5.2],  // Northern Ireland
+  [55.0, -6.5, 57.5, -1.0],  // southern/central Scotland
+  [57.5, -8.0, 61.0, 0.0],   // northern Scotland + isles
 ];
 
 // operator tag regex → ParkMate operatorId (ids should exist in operators.json;
@@ -118,29 +134,15 @@ const OVERPASS_OPERATOR_RE = [
   'Matalan',
 ].join('|');
 
-// GB (incl. Northern Ireland) + Isle of Man + Jersey + Guernsey.
-const AREA_CLAUSE = `(
-  area["ISO3166-1"="GB"][admin_level=2];
-  area["ISO3166-1"="IM"][admin_level=2];
-  area["ISO3166-1"="JE"][admin_level=2];
-  area["ISO3166-1"="GG"][admin_level=2];
-)->.a;`;
-
-const OVERPASS_QUERY_OPERATORS = `
-[out:json][timeout:500][maxsize:1073741824];
-${AREA_CLAUSE}
-(
-  nwr["amenity"="parking"]["operator"~"${OVERPASS_OPERATOR_RE}",i](area.a);
-);
+const tileQueryOperators = ([s, w, n, e]) => `
+[out:json][timeout:120];
+nwr["amenity"="parking"]["operator"~"${OVERPASS_OPERATOR_RE}",i](${s},${w},${n},${e});
 out center tags;
 `;
 
-const OVERPASS_QUERY_MAXSTAY = `
-[out:json][timeout:500][maxsize:1073741824];
-${AREA_CLAUSE}
-(
-  nwr["amenity"="parking"]["maxstay"][!"operator"](area.a);
-);
+const tileQueryMaxstay = ([s, w, n, e]) => `
+[out:json][timeout:120];
+nwr["amenity"="parking"]["maxstay"][!"operator"](${s},${w},${n},${e});
 out center tags;
 `;
 
@@ -254,15 +256,18 @@ export function merge(existing, osmSites) {
   };
 }
 
-async function fetchOverpass(query) {
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function fetchOverpass(query, { attempts = 6 } = {}) {
   let lastErr;
-  for (const endpoint of OVERPASS_ENDPOINTS) {
+  for (let i = 0; i < attempts; i++) {
+    const endpoint = OVERPASS_ENDPOINTS[i % OVERPASS_ENDPOINTS.length];
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'ParkMate-DB-Import/1.1 (+https://github.com/nickbh89/park-mate)',
+          'User-Agent': 'ParkMate-DB-Import/1.2 (+https://github.com/nickbh89/park-mate)',
         },
         body: 'data=' + encodeURIComponent(query),
       });
@@ -270,10 +275,24 @@ async function fetchOverpass(query) {
       return await res.json();
     } catch (e) {
       lastErr = e;
-      console.error(`Overpass endpoint failed: ${e.message}`);
+      const wait = Math.min(15000 * (i + 1), 60000);
+      console.error(`  Overpass attempt ${i + 1}/${attempts} failed: ${e.message} — waiting ${wait / 1000}s`);
+      if (i < attempts - 1) await sleep(wait);
     }
   }
   throw lastErr;
+}
+
+/** Fetch every tile for a query builder, politely (pause between tiles). */
+async function fetchTiles(buildQuery, label) {
+  const elements = [];
+  for (const [idx, tile] of TILES.entries()) {
+    console.log(`  ${label}: tile ${idx + 1}/${TILES.length} [${tile.join(', ')}]`);
+    const data = await fetchOverpass(buildQuery(tile));
+    elements.push(...(data.elements || []));
+    if (idx < TILES.length - 1) await sleep(8000);
+  }
+  return elements;
 }
 
 const FIXTURE = {
@@ -320,17 +339,17 @@ async function main() {
 
   if (mode === '--test') return runTest(existing);
 
-  console.log('Querying Overpass: operator/brand-tagged car parks (GB+IM+JE+GG)…');
-  const opData = await fetchOverpass(OVERPASS_QUERY_OPERATORS);
-  const opSites = (opData.elements || []).map((e) => elementToSite(e, 'operator')).filter(Boolean);
-  console.log(`  ${opData.elements?.length ?? 0} elements -> ${opSites.length} mapped sites`);
+  console.log('Querying Overpass: operator/brand-tagged car parks (tiled, GB+NI+IoM+CI)…');
+  const opElements = await fetchTiles(tileQueryOperators, 'operators');
+  const opSites = opElements.map((e) => elementToSite(e, 'operator')).filter(Boolean);
+  console.log(`  ${opElements.length} elements -> ${opSites.length} mapped sites`);
 
-  console.log('Querying Overpass: maxstay-tagged car parks with no operator…');
+  console.log('Querying Overpass: maxstay-tagged car parks with no operator (tiled)…');
   let msSites = [];
   try {
-    const msData = await fetchOverpass(OVERPASS_QUERY_MAXSTAY);
-    msSites = (msData.elements || []).map((e) => elementToSite(e, 'maxstay')).filter(Boolean);
-    console.log(`  ${msData.elements?.length ?? 0} elements -> ${msSites.length} mapped sites`);
+    const msElements = await fetchTiles(tileQueryMaxstay, 'maxstay');
+    msSites = msElements.map((e) => elementToSite(e, 'maxstay')).filter(Boolean);
+    console.log(`  ${msElements.length} elements -> ${msSites.length} mapped sites`);
   } catch (e) {
     console.error(`  maxstay query failed (${e.message}) — continuing with operator sites only`);
   }
