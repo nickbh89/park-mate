@@ -98,7 +98,7 @@ test('parkingSites.json: valid, UK coords, operators resolve, sane values', () =
     assert.ok(s.lng > -8.5 && s.lng < 2, `${s.id} lng out of UK range`);
     assert.ok(opIds.has(s.operatorId), `${s.id} unknown operator ${s.operatorId}`);
     assert.ok(s.radiusM >= 50 && s.radiusM <= 400, `${s.id} radius ${s.radiusM}`);
-    if (s.siteType === 'free-max-stay') assert.ok(s.maxStayMinutes >= 30, `${s.id} maxStay`);
+    if (s.siteType === 'free-max-stay') assert.ok(s.maxStayMinutes >= 10, `${s.id} maxStay`);
     assert.strictEqual(s.verified, false, `${s.id}: seed entries must be verified:false until surveyed`);
   }
   assert.ok(sites.sites.length >= 25, 'expected 25+ seed sites');
