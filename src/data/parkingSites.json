@@ -11,18 +11,18 @@
   },
   "sites": [
     {
-      "id": "aldi-frodsham",
-      "name": "Aldi Frodsham (Ship Street)",
+      "id": "morrisons-frodsham",
+      "name": "Morrisons Frodsham (High Street)",
       "town": "Frodsham",
-      "operatorId": "parkingeye",
-      "lat": 53.2967,
-      "lng": -2.723,
+      "operatorId": "euro-car-parks",
+      "lat": 53.29547,
+      "lng": -2.72357,
       "radiusM": 80,
-      "siteType": "free-max-stay",
-      "maxStayMinutes": 90,
-      "confidence": "medium",
+      "siteType": "pay-and-display",
+      "maxStayMinutes": null,
+      "confidence": "high",
       "verified": false,
-      "notes": "Aldi sites nationally managed by ParkingEye ANPR; typical 90-min customer limit."
+      "notes": "Euro Car Parks site 682106 - 142 spaces, pay car park (50p/hr, 2 GBP/day). Corrected from erroneous 'Aldi Ship Street' seed entry; there is no Aldi in Frodsham."
     },
     {
       "id": "eddisbury-square-frodsham",
