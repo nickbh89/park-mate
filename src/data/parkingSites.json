@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "effectiveDate": "2026-08-28",
+  "effectiveDate": "2026-08-31",
   "region": "United Kingdom, Isle of Man & Channel Islands (curated + OSM import)",
   "disclaimer": "Seed data compiled by research, not survey. Coordinates are approximate site centroids and operator attributions / max-stay values reflect commonly reported terms which change without notice. Every entry MUST be field-verified (signage is the legal source of truth) before public release. verified:false marks unsurveyed entries.",
   "defaults": {
@@ -34689,6 +34689,22 @@
       "notes": "OSM maxstay: 3 hours — operator untagged, enforcement unverified"
     },
     {
+      "id": "osm-way-39176885",
+      "name": "HGVs",
+      "town": "",
+      "operatorId": null,
+      "lat": 54.72757,
+      "lng": -1.52304,
+      "radiusM": 120,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 120,
+      "confidence": "low",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/39176885",
+      "notes": "OSM maxstay: 2 hours — operator untagged, enforcement unverified"
+    },
+    {
       "id": "osm-way-392108017",
       "name": "Asda car park",
       "town": "",
@@ -40706,9 +40722,9 @@
     },
     {
       "id": "osm-way-51979345",
-      "name": "Indigo Parking car park",
+      "name": "Saba Parking car park",
       "town": "Hemel Hempstead",
-      "operatorId": "indigo",
+      "operatorId": "saba",
       "lat": 51.74197,
       "lng": -0.48746,
       "radiusM": 120,
@@ -46175,6 +46191,22 @@
       "source": "osm",
       "osmRef": "way/708576281",
       "notes": "Lidl store car park — Lidl sites are widely managed by Athena ANPR · OSM maxstay: 90 minutes"
+    },
+    {
+      "id": "osm-way-70890587",
+      "name": "Private car park",
+      "town": "",
+      "operatorId": null,
+      "lat": 54.72916,
+      "lng": -1.52323,
+      "radiusM": 120,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 120,
+      "confidence": "low",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/70890587",
+      "notes": "OSM maxstay: 2 hours — operator untagged, enforcement unverified"
     },
     {
       "id": "osm-way-709024352",
@@ -52961,6 +52993,22 @@
       "notes": "KFC car park — commonly ANPR-enforced under contract"
     },
     {
+      "id": "osm-way-945963522",
+      "name": "Beck Retail Park",
+      "town": "Wakefield",
+      "operatorId": "euro-car-parks",
+      "lat": 53.67801,
+      "lng": -1.49692,
+      "radiusM": 120,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 240,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/945963522",
+      "notes": "OSM maxstay: 4 hours"
+    },
+    {
       "id": "osm-way-947267880",
       "name": "Tesco Express",
       "town": "",
@@ -55220,7 +55268,7 @@
   "attribution": "Contains data © OpenStreetMap contributors (ODbL). Operator attributions and stay terms are unverified — on-site signage is authoritative.",
   "stats": {
     "curated": 29,
-    "osm": 3425,
-    "importedAt": "2026-08-28T13:44:15.881Z"
+    "osm": 3428,
+    "importedAt": "2026-08-31T11:06:18.815Z"
   }
 }
