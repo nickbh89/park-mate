@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support — ParkMate</title>
+<meta name="description" content="Get help with ParkMate, report a problem or request a feature.">
+<meta name="theme-color" content="#0E1726">
+<meta property="og:title" content="Support — ParkMate">
+<meta property="og:description" content="Get help with ParkMate, report a problem or request a feature.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://parkmate.bhapps.co.uk/">
+<meta property="og:image" content="https://parkmate.bhapps.co.uk/assets/icon.svg">
+<link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="assets/icon.svg" alt="" width="32" height="32">ParkMate</a>
+    <nav aria-label="Primary">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#coverage">Where it works</a>
+      <a href="index.html#faq">FAQ</a>
+      <a href="support.html">Support</a>
+      <a class="btn" href="support.html#beta">Request early access</a>
+    </nav>
+  </div>
+</header>
+<main id="main">
+
+<div class="page"><div class="wrap">
+  <h1>Support</h1>
+  <p class="updated">ParkMate is built and supported by one person, so replies are quick but not instant.</p>
+  <p>Found a bug, spotted a missed detection, or want something added? Send it through the form or email <a href="mailto:hello@bhapps.co.uk">hello@bhapps.co.uk</a>. For detection problems, the date, time and rough location make a report much easier to act on.</p>
+  <h2 id="beta">Early access</h2>
+  <p>ParkMate is in closed testing on Google Play. Use the form below with <strong>Early access / beta request</strong> as the topic and include the Google account email you use on your Android phone; you'll be added to the tester list and sent the install link.</p>
+  <h2>Contact form</h2>
+  <form name="support" method="POST" action="thanks.html" data-netlify="true" netlify-honeypot="company">
+    <input type="hidden" name="form-name" value="support">
+    <input type="hidden" name="app" value="ParkMate">
+    <p class="hp"><label>Don't fill this in: <input name="company"></label></p>
+    <label>Your name <input name="name" autocomplete="name" required></label>
+    <label>Email <input type="email" name="email" autocomplete="email" required></label>
+    <label>Topic <select name="topic"><option>Early access / beta request</option><option>Bug report</option><option>Car park missing or wrong</option><option>Feature request</option><option>Privacy question</option><option>Something else</option></select></label>
+    <label>Message <textarea name="message" required></textarea></label>
+    <div><button class="btn" type="submit">Send</button></div>
+  </form>
+  <h2>Delete your data</h2>
+  <p>ParkMate keeps nothing about you on a server. Uninstalling the app removes everything it stored on your phone. See the <a href="privacy.html">privacy policy</a> for details.</p>
+</div></div>
+</main>
+<footer>
+  <div class="wrap">
+    <div class="co"><span class="bh">BH</span> ParkMate is made by <a href="https://bhapps.co.uk">BH Apps</a> · © 2026 BH Apps</div>
+    <div class="links">
+      <a href="privacy.html">Privacy</a>
+      <a href="support.html">Support</a>
+      <a href="https://ko-fi.com/nickbradshawhughes" rel="noopener">Leave a tip</a>
+      <a href="https://tollmate.bhapps.co.uk" rel="noopener">Toll Mate</a>
+      <a href="https://github.com/nickbh89/park-mate" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
