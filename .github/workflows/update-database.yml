@@ -23,6 +23,8 @@ jobs:
         run: node scripts/import-osm.mjs --test
 
       - name: Import UK sites from OpenStreetMap
+        env:
+          IMPORT_BUDGET_MINUTES: 150
         run: node scripts/import-osm.mjs
 
       - name: Commit updated database
