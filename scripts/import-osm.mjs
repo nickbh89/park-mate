@@ -258,18 +258,23 @@ export function merge(existing, osmSites) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function fetchOverpass(query, { attempts = 6 } = {}) {
+const FETCH_TIMEOUT_MS = 180000;
+
+async function fetchOverpass(query, { attempts = 6, fetchImpl = fetch, sleepImpl = sleep } = {}) {
   let lastErr;
   for (let i = 0; i < attempts; i++) {
     const endpoint = OVERPASS_ENDPOINTS[i % OVERPASS_ENDPOINTS.length];
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
     try {
-      const res = await fetch(endpoint, {
+      const res = await fetchImpl(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'ParkMate-DB-Import/1.2 (+https://github.com/nickbh89/park-mate)',
+          'User-Agent': 'ParkMate-DB-Import/1.3 (+https://github.com/nickbh89/park-mate)',
         },
         body: 'data=' + encodeURIComponent(query),
+        signal: ctrl.signal,
       });
       if (!res.ok) throw new Error(`${endpoint} -> HTTP ${res.status}`);
       return await res.json();
@@ -277,22 +282,87 @@ async function fetchOverpass(query, { attempts = 6 } = {}) {
       lastErr = e;
       const wait = Math.min(15000 * (i + 1), 60000);
       console.error(`  Overpass attempt ${i + 1}/${attempts} failed: ${e.message} — waiting ${wait / 1000}s`);
-      if (i < attempts - 1) await sleep(wait);
+      if (i < attempts - 1) await sleepImpl(wait);
+    } finally {
+      clearTimeout(timer);
     }
   }
   throw lastErr;
 }
 
-/** Fetch every tile for a query builder, politely (pause between tiles). */
+/** Split a (south, west, north, east) box into four quadrants. */
+export function splitTile([s, w, n, e]) {
+  const mLat = (s + n) / 2;
+  const mLng = (w + e) / 2;
+  return [
+    [s, w, mLat, mLng], [s, mLng, mLat, e],
+    [mLat, w, n, mLng], [mLat, mLng, n, e],
+  ];
+}
+
+/** Fetch one tile. A 504 usually means the query was too heavy for a busy
+ *  server, so when every attempt fails the tile is split into quadrants and
+ *  each quadrant is tried on its own. Boxes
+ *  that still fail are returned in `failed` instead of aborting the run. */
+const MAX_SPLIT_DEPTH = 1;
+// Overall time budget for network work. Once it is spent, remaining boxes are
+// skipped (and their existing sites kept) so a bad day cannot run for hours.
+const RUN_BUDGET_MS = 60 * 60 * 1000;
+const runStarted = Date.now();
+const budgetSpent = () => Date.now() - runStarted > RUN_BUDGET_MS;
+export async function fetchTile(buildQuery, tile, opts = {}, depth = 0) {
+  const sleepImpl = opts.sleepImpl || sleep;
+  if (budgetSpent()) {
+    console.error(`  time budget spent — skipping box [${tile.join(', ')}]`);
+    return { elements: [], failed: [tile] };
+  }
+  try {
+    const data = await fetchOverpass(buildQuery(tile), { ...opts, attempts: depth === 0 ? 6 : 3 });
+    return { elements: data.elements || [], failed: [] };
+  } catch (e) {
+    if (depth >= MAX_SPLIT_DEPTH) {
+      console.error(`  giving up on box [${tile.join(', ')}]: ${e.message}`);
+      return { elements: [], failed: [tile] };
+    }
+    console.error(`  box [${tile.join(', ')}] failed — splitting into quadrants`);
+    const out = { elements: [], failed: [] };
+    for (const quad of splitTile(tile)) {
+      const r = await fetchTile(buildQuery, quad, opts, depth + 1);
+      out.elements.push(...r.elements);
+      out.failed.push(...r.failed);
+      await sleepImpl(5000);
+    }
+    return out;
+  }
+}
+
+/** Fetch every tile for a query builder, politely (pause between tiles).
+ *  Returns the elements plus the list of boxes that could not be fetched. */
 async function fetchTiles(buildQuery, label) {
   const elements = [];
+  const failed = [];
   for (const [idx, tile] of TILES.entries()) {
     console.log(`  ${label}: tile ${idx + 1}/${TILES.length} [${tile.join(', ')}]`);
-    const data = await fetchOverpass(buildQuery(tile));
-    elements.push(...(data.elements || []));
+    const r = await fetchTile(buildQuery, tile);
+    elements.push(...r.elements);
+    failed.push(...r.failed);
     if (idx < TILES.length - 1) await sleep(8000);
   }
-  return elements;
+  return { elements, failed };
+}
+
+const inBox = (site, [s, w, n, e]) => site.lat >= s && site.lat <= n && site.lng >= w && site.lng <= e;
+const isMaxstayClass = (site) => site.operatorId === null && /operator untagged/.test(site.notes || '');
+
+/** Sites from the previous database to keep because the box they sit in could
+ *  not be refreshed this run. Without this a failed box would silently delete
+ *  every car park inside it. */
+export function carryOver(existing, failedOperatorBoxes, failedMaxstayBoxes) {
+  return existing.sites.filter((site) => {
+    if (site.source !== 'osm') return false;
+    const boxes = isMaxstayClass(site) ? failedMaxstayBoxes : failedOperatorBoxes;
+    return boxes.some((box) => inBox(site, box));
+  });
 }
 
 const FIXTURE = {
@@ -313,7 +383,7 @@ const FIXTURE = {
   ],
 };
 
-function runTest(existing) {
+async function runTest(existing) {
   const assert = (cond, msg) => { if (!cond) { console.error(`  ✗ ${msg}`); process.exitCode = 1; } else console.log(`  ✓ ${msg}`); };
   assert(parseMaxstay('2 hours') === 120, 'parseMaxstay "2 hours" -> 120');
   assert(parseMaxstay('90 minutes') === 90, 'parseMaxstay "90 minutes" -> 90');
@@ -330,7 +400,47 @@ function runTest(existing) {
   assert(ms.length === 1 && ms[0].confidence === 'low' && ms[0].siteType === 'free-max-stay', 'maxstay class: 1 site, low confidence, free-max-stay');
   const merged = merge(existing, [...sites, ...ms]);
   assert(merged.sites.filter((s) => s.source === 'osm').length >= 6, 'merge keeps new osm sites, drops curated-adjacent dup');
+  // carry-over: sites in a failed box are kept, by class
+  const prev = { sites: [
+    { id: 'cur-1', lat: 50, lng: 0 },
+    { id: 'osm-a', source: 'osm', lat: 50, lng: 0, operatorId: 'ncp', notes: '' },
+    { id: 'osm-b', source: 'osm', lat: 50, lng: 0, operatorId: null, notes: 'OSM maxstay: 2 hours — operator untagged, enforcement unverified' },
+    { id: 'osm-c', source: 'osm', lat: 56, lng: -3, operatorId: 'ncp', notes: '' },
+  ] };
+  const box = [49, -3, 50.5, 2];
+  assert(carryOver(prev, [box], []).map((x) => x.id).join() === 'osm-a', 'carryOver keeps operator-class sites in a failed operator box');
+  assert(carryOver(prev, [], [box]).map((x) => x.id).join() === 'osm-b', 'carryOver keeps maxstay-class sites in a failed maxstay box');
+  assert(carryOver(prev, [], []).length === 0, 'carryOver keeps nothing when no box failed');
+  const quads = splitTile([49, -3, 50.5, 2]);
+  assert(quads.length === 4 && quads[0][2] === 49.75 && quads[3][1] === -0.5, 'splitTile makes four quadrants');
+  await testFetchTile(assert);
   console.log(process.exitCode ? 'TESTS FAILED' : 'All import tests passed');
+}
+
+async function testFetchTile(assert) {
+  const noSleep = async () => {};
+  const quiet = console.error; console.error = () => {};
+  try {
+    // whole tile always 504s, quadrants succeed -> elements from 4 quadrants, nothing failed
+    let calls = 0;
+    const bigFails = async (_url, init) => {
+      calls++;
+      const q = decodeURIComponent(init.body);
+      const whole = q.includes('(49,-3,50.5,2)');
+      return whole ? { ok: false, status: 504 } : { ok: true, json: async () => ({ elements: [{ id: calls }] }) };
+    };
+    const r1 = await fetchTile(tileQueryOperators, [49, -3, 50.5, 2], { fetchImpl: bigFails, sleepImpl: noSleep });
+    console.error = quiet;
+    assert(r1.elements.length === 4 && r1.failed.length === 0, 'fetchTile splits a failing tile and recovers via quadrants');
+    console.error = () => {};
+    // everything 504s -> no throw, the 4 quadrants are reported failed
+    const allFail = async () => ({ ok: false, status: 504 });
+    const r2 = await fetchTile(tileQueryOperators, [49, -3, 50.5, 2], { fetchImpl: allFail, sleepImpl: noSleep });
+    console.error = quiet;
+    assert(r2.elements.length === 0 && r2.failed.length === 4, 'fetchTile reports failed boxes instead of throwing');
+  } finally {
+    console.error = quiet;
+  }
 }
 
 async function main() {
@@ -340,22 +450,34 @@ async function main() {
   if (mode === '--test') return runTest(existing);
 
   console.log('Querying Overpass: operator/brand-tagged car parks (tiled, GB+NI+IoM+CI)…');
-  const opElements = await fetchTiles(tileQueryOperators, 'operators');
-  const opSites = opElements.map((e) => elementToSite(e, 'operator')).filter(Boolean);
-  console.log(`  ${opElements.length} elements -> ${opSites.length} mapped sites`);
+  const op = await fetchTiles(tileQueryOperators, 'operators');
+  const opSites = op.elements.map((e) => elementToSite(e, 'operator')).filter(Boolean);
+  console.log(`  ${op.elements.length} elements -> ${opSites.length} mapped sites`);
 
   console.log('Querying Overpass: maxstay-tagged car parks with no operator (tiled)…');
-  let msSites = [];
-  try {
-    const msElements = await fetchTiles(tileQueryMaxstay, 'maxstay');
-    msSites = msElements.map((e) => elementToSite(e, 'maxstay')).filter(Boolean);
-    console.log(`  ${msElements.length} elements -> ${msSites.length} mapped sites`);
-  } catch (e) {
-    console.error(`  maxstay query failed (${e.message}) — continuing with operator sites only`);
+  const ms = await fetchTiles(tileQueryMaxstay, 'maxstay');
+  const msSites = ms.elements.map((e) => elementToSite(e, 'maxstay')).filter(Boolean);
+  console.log(`  ${ms.elements.length} elements -> ${msSites.length} mapped sites`);
+
+  if (op.elements.length === 0 && ms.elements.length === 0) {
+    throw new Error('Overpass returned nothing for any tile — database left unchanged.');
   }
 
-  const merged = merge(existing, [...opSites, ...msSites]);
+  const kept = carryOver(existing, op.failed, ms.failed);
+  if (kept.length) {
+    const n = op.failed.length + ms.failed.length;
+    console.log(`::warning::${n} box(es) could not be refreshed; kept ${kept.length} existing sites inside them.`);
+  }
+
+  const merged = merge(existing, [...opSites, ...msSites, ...kept]);
   console.log(`Merged database: ${merged.stats.curated} curated + ${merged.stats.osm} OSM = ${merged.sites.length} sites`);
+
+  // Safety net: never publish a database that has lost a large share of its
+  // sites in one run — that means a bad import, not a real-world change.
+  const before = existing.sites.filter((x) => x.source === 'osm').length;
+  if (before > 0 && merged.stats.osm < before * 0.9) {
+    throw new Error(`Import would shrink OSM sites from ${before} to ${merged.stats.osm} — refusing to write.`);
+  }
 
   if (mode === '--dry-run') return console.log('Dry run — nothing written.');
   writeFileSync(SITES_PATH, JSON.stringify(merged, null, 2) + '\n');
