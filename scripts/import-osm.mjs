@@ -15,6 +15,10 @@
 // Maps them to the ParkMate schema, merges with the hand-curated seed sites
 // (curated always wins), and rewrites src/data/parkingSites.json.
 //
+// Each run works through the stalest areas first and stops when its time budget
+// (IMPORT_BUDGET_MINUTES, default 150) is spent; areas it did not reach keep
+// the sites they already had and go to the front of the queue next run.
+//
 // Usage:
 //   node scripts/import-osm.mjs            # fetch from Overpass and write
 //   node scripts/import-osm.mjs --dry-run  # fetch, print stats, write nothing
@@ -137,15 +141,21 @@ const OVERPASS_OPERATOR_RE = [
   'Matalan',
 ].join('|');
 
+// The tiles are rectangles, so they also cover northern France and part of the
+// Republic of Ireland. Every query keeps only car parks inside these areas.
+const UK_AREA = 'area["ISO3166-1"~"^(GB|IM|JE|GG)$"]["admin_level"="2"]->.uk;';
+
 const tileQueryOperators = ([s, w, n, e]) => `
 [out:json][timeout:120];
-nwr["amenity"="parking"]["operator"~"${OVERPASS_OPERATOR_RE}",i](${s},${w},${n},${e});
+${UK_AREA}
+nwr["amenity"="parking"]["operator"~"${OVERPASS_OPERATOR_RE}",i](${s},${w},${n},${e})(area.uk);
 out center tags;
 `;
 
 const tileQueryMaxstay = ([s, w, n, e]) => `
 [out:json][timeout:120];
-nwr["amenity"="parking"]["maxstay"][!"operator"](${s},${w},${n},${e});
+${UK_AREA}
+nwr["amenity"="parking"]["maxstay"][!"operator"](${s},${w},${n},${e})(area.uk);
 out center tags;
 `;
 
@@ -174,9 +184,16 @@ export function mapBrand(tag) {
   return null;
 }
 
-// bounds covering GB, NI, IoM and the Channel Islands
-function inBounds(lat, lng) {
-  return lat >= 49 && lat <= 61 && lng >= -8.5 && lng <= 2;
+// Bounds covering GB, NI, IoM and the Channel Islands, minus the parts of that
+// rectangle that are France: Normandy (east of the Channel Islands and south of
+// the English coast) and the Calais/Boulogne coast (east of Dover). The queries
+// filter by country too; this is a second check that needs no network.
+export function inBounds(lat, lng) {
+  if (!(lat >= 49 && lat <= 61 && lng >= -8.5 && lng <= 2)) return false;
+  if (lat < 49.9 && lng > -1.98) return false;
+  if (lat < 50.5 && lng > -1.9) return false;
+  if (lat < 51.2 && lng > 1.45) return false;
+  return true;
 }
 
 export function elementToSite(el, klass = 'operator') {
@@ -246,6 +263,7 @@ const ANCHOR_BRAND_RE = [
 // Both sets come back so each car park can be named after its nearest anchor.
 const tileQueryAdjacent = ([s, w, n, e]) => `
 [out:json][timeout:170];
+${UK_AREA}
 (
   nwr["brand"~"${ANCHOR_BRAND_RE}",i]["shop"](${s},${w},${n},${e});
   nwr["brand"~"${ANCHOR_BRAND_RE}",i]["amenity"~"^(fast_food|restaurant|cafe|cinema)$"](${s},${w},${n},${e});
@@ -258,7 +276,7 @@ const tileQueryAdjacent = ([s, w, n, e]) => `
   nwr["highway"="services"](${s},${w},${n},${e});
 )->.anchors;
 .anchors out center tags;
-nwr["amenity"="parking"](around.anchors:60)(${s},${w},${n},${e});
+nwr["amenity"="parking"](around.anchors:60)(${s},${w},${n},${e})(area.uk);
 out center tags;
 `;
 
@@ -382,13 +400,15 @@ export function merge(existing, osmSites) {
   const fresh = osmSites.filter((o) => {
     if (seen.has(o.id)) return false; // element matched by both queries
     seen.add(o.id);
+    if (!inBounds(o.lat, o.lng)) return false; // sites imported before the country filter existed
     return !curated.some((c) => haversineM(c.lat, c.lng, o.lat, o.lng) < 150);
   });
   fresh.sort((a, b) => a.id.localeCompare(b.id)); // stable diffs
   return {
     ...existing,
     region: 'United Kingdom, Isle of Man & Channel Islands (curated + OSM import)',
-    effectiveDate: new Date().toISOString().slice(0, 10),
+    // Full timestamp, so a second update on the same day still counts as newer.
+    effectiveDate: new Date().toISOString().slice(0, 16),
     attribution: 'Contains data © OpenStreetMap contributors (ODbL). Operator attributions and stay terms are unverified — on-site signage is authoritative.',
     sites: [...curated, ...fresh],
     stats: { curated: curated.length, osm: fresh.length, importedAt: new Date().toISOString() },
@@ -452,7 +472,7 @@ export function splitTile([s, w, n, e]) {
 const MAX_SPLIT_DEPTH = 1;
 // Overall time budget for network work. Once it is spent, remaining boxes are
 // skipped (and their existing sites kept) so a bad day cannot run for hours.
-const RUN_BUDGET_MS = 110 * 60 * 1000;
+const RUN_BUDGET_MS = (Number(process.env.IMPORT_BUDGET_MINUTES) || 150) * 60 * 1000;
 const runStarted = Date.now();
 const budgetSpent = () => Date.now() - runStarted > RUN_BUDGET_MS;
 export async function fetchTile(buildQuery, tile, opts = {}, depth = 0) {
@@ -585,6 +605,21 @@ async function runTest(existing) {
   assert(carryOver({ sites: [{ id: 'x', source: 'osm', lat: 50, lng: 0, operatorId: null, notes: adj[0].notes }] }, [], [], [box]).length === 1, 'carryOver keeps adjacent-class sites in a failed adjacent box');
   const round = JSON.parse(serialise({ schemaVersion: 1, sites: adj, stats: { osm: 3 } }));
   assert(round.sites.length === 3 && round.stats.osm === 3 && round.schemaVersion === 1, 'serialise writes valid JSON that round-trips');
+  // country filter
+  assert(inBounds(53.2955, -2.7236) && inBounds(49.19, -2.11) && inBounds(54.15, -4.48) && inBounds(51.13, 1.31) && inBounds(50.6, -1.2) && inBounds(49.92, -6.3), 'inBounds keeps Frodsham, Jersey, Isle of Man, Dover, Isle of Wight, Scilly');
+  assert(!inBounds(49.18, -0.36) && !inBounds(49.44, 1.09) && !inBounds(50.95, 1.85) && !inBounds(49.65, -1.62) && !inBounds(49.92, 1.08), 'inBounds drops Caen, Rouen, Calais, Cherbourg, Dieppe');
+  const withFrance = merge({ sites: [] }, [
+    { id: 'osm-way-1', lat: 53.3, lng: -2.7 }, { id: 'osm-way-2', lat: 49.18, lng: -0.36 },
+  ]);
+  assert(withFrance.sites.length === 1 && withFrance.sites[0].id === 'osm-way-1', 'merge drops sites outside the UK');
+  // job queue
+  const firstPlan = planTasks({});
+  assert(firstPlan.length === 42 && firstPlan.slice(0, 28).every((t) => t.klass === 'adjacent'), 'planTasks: 42 jobs, adjacent first when nothing has ever been refreshed');
+  const stamped = Object.fromEntries(firstPlan.slice(0, 40).map((t) => [t.key, '2026-10-11T12:00']));
+  stamped[firstPlan[3].key] = '2026-10-04T12:00';
+  const nextPlan = planTasks(stamped);
+  assert(nextPlan[0].key === firstPlan[40].key && nextPlan[1].key === firstPlan[41].key && nextPlan[2].key === firstPlan[3].key, 'planTasks: never-refreshed jobs first, then the oldest');
+  assert(/area\.uk/.test(tileQueryAdjacent([49, -3, 50, 2])) && /area\.uk/.test(tileQueryOperators([49, -3, 50, 2])) && /area\.uk/.test(tileQueryMaxstay([49, -3, 50, 2])), 'all three queries filter to UK areas');
   await testFetchTile(assert);
   console.log(process.exitCode ? 'TESTS FAILED' : 'All import tests passed');
 }
@@ -621,6 +656,20 @@ async function testFetchTile(assert) {
   }
 }
 
+/** Every (pass, tile) job, stalest first: jobs never completed come before any
+ *  completed job, and among those the adjacent pass goes first. A run works
+ *  down this list until the time budget is spent, so each run refreshes the
+ *  areas that have waited longest and no area is starved by a slow day. */
+export function planTasks(refreshed = {}) {
+  const tasks = [
+    ...TILES.flatMap(splitTile).map((tile) => ({ klass: 'adjacent', tile, build: tileQueryAdjacent })),
+    ...TILES.map((tile) => ({ klass: 'operator', tile, build: tileQueryOperators })),
+    ...TILES.map((tile) => ({ klass: 'maxstay', tile, build: tileQueryMaxstay })),
+  ].map((t) => ({ ...t, key: `${t.klass}:${t.tile.join(',')}` }));
+  // Array.prototype.sort is stable, so ties keep the order above.
+  return tasks.sort((a, b) => (refreshed[a.key] || '').localeCompare(refreshed[b.key] || ''));
+}
+
 /** One site per line: valid JSON, a fifth of the size of full pretty-printing,
  *  and still gives readable line-by-line diffs. */
 export function serialise(db) {
@@ -635,30 +684,37 @@ async function main() {
 
   if (mode === '--test') return runTest(existing);
 
-  console.log('Querying Overpass: operator/brand-tagged car parks (tiled, GB+NI+IoM+CI)…');
-  const op = await fetchTiles(tileQueryOperators, 'operators');
-  const opSites = op.elements.map((e) => elementToSite(e, 'operator')).filter(Boolean);
-  console.log(`  ${op.elements.length} elements -> ${opSites.length} mapped sites`);
-
-  console.log('Querying Overpass: maxstay-tagged car parks with no operator (tiled)…');
-  const ms = await fetchTiles(tileQueryMaxstay, 'maxstay');
-  const msSites = ms.elements.map((e) => elementToSite(e, 'maxstay')).filter(Boolean);
-  console.log(`  ${ms.elements.length} elements -> ${msSites.length} mapped sites`);
-
-  if (op.elements.length === 0 && ms.elements.length === 0) {
-    throw new Error('Overpass returned nothing for any tile — database left unchanged.');
+  const refreshed = { ...(existing.stats?.refreshed || {}) };
+  const tasks = planTasks(refreshed);
+  const got = { operator: [], maxstay: [], adjacent: [] };
+  const failed = { operator: [], maxstay: [], adjacent: [] };
+  let done = 0;
+  let skipped = 0;
+  console.log(`Querying Overpass: ${tasks.length} jobs, stalest first (UK, Isle of Man, Channel Islands)…`);
+  for (const [idx, task] of tasks.entries()) {
+    if (budgetSpent()) { failed[task.klass].push(task.tile); skipped += 1; continue; }
+    console.log(`  ${idx + 1}/${tasks.length} ${task.klass} [${task.tile.join(', ')}] last refreshed ${refreshed[task.key] || 'never'}`);
+    const r = await fetchTile(task.build, task.tile);
+    got[task.klass].push(...r.elements);
+    failed[task.klass].push(...r.failed);
+    if (r.failed.length === 0) { refreshed[task.key] = new Date().toISOString().slice(0, 16); done += 1; }
+    await sleep(8000);
+  }
+  console.log(`  ${done} jobs completed, ${skipped} skipped for time, ${tasks.length - done - skipped} failed or partial`);
+  if (done === 0) {
+    throw new Error('Overpass completed no job at all — database left unchanged.');
   }
 
-  // The adjacent pass is the heaviest query, so it runs on quarter tiles.
-  console.log('Querying Overpass: car parks next to stores, retail parks, hospitals, stations (quarter tiles)…');
-  const adj = await fetchTiles(tileQueryAdjacent, 'adjacent', TILES.flatMap(splitTile));
-  const adjRaw = adjacentSites(adj.elements);
-  console.log(`  ${adj.elements.length} elements -> ${adjRaw.length} candidate sites`);
+  const opSites = got.operator.map((e) => elementToSite(e, 'operator')).filter(Boolean);
+  const msSites = got.maxstay.map((e) => elementToSite(e, 'maxstay')).filter(Boolean);
+  const adjRaw = adjacentSites(got.adjacent);
+  console.log(`  operator ${got.operator.length} elements -> ${opSites.length} sites; maxstay ${got.maxstay.length} -> ${msSites.length}; adjacent ${got.adjacent.length} -> ${adjRaw.length} candidates`);
 
-  const kept = carryOver(existing, op.failed, ms.failed, adj.failed);
+  // Anything not refreshed this run keeps the sites it already had.
+  const kept = carryOver(existing, failed.operator, failed.maxstay, failed.adjacent);
   if (kept.length) {
-    const n = op.failed.length + ms.failed.length + adj.failed.length;
-    console.log(`::warning::${n} box(es) could not be refreshed; kept ${kept.length} existing sites inside them.`);
+    const n = failed.operator.length + failed.maxstay.length + failed.adjacent.length;
+    console.log(`::warning::${n} box(es) were not refreshed this run; kept ${kept.length} existing sites inside them.`);
   }
 
   // Confirmed sites first; adjacent candidates only fill the gaps between them.
@@ -672,11 +728,12 @@ async function main() {
   console.log(`  ${adjSites.length} adjacent sites kept after removing overlaps`);
 
   const merged = merge(existing, [...confirmed, ...adjSites]);
+  merged.stats.refreshed = Object.fromEntries(Object.entries(refreshed).sort());
   console.log(`Merged database: ${merged.stats.curated} curated + ${merged.stats.osm} OSM = ${merged.sites.length} sites`);
 
   // Safety net: never publish a database that has lost a large share of its
   // sites in one run — that means a bad import, not a real-world change.
-  const before = existing.sites.filter((x) => x.source === 'osm').length;
+  const before = existing.sites.filter((x) => x.source === 'osm' && inBounds(x.lat, x.lng)).length;
   if (before > 0 && merged.stats.osm < before * 0.95) {
     throw new Error(`Import would shrink OSM sites from ${before} to ${merged.stats.osm} — refusing to write.`);
   }
