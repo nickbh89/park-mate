@@ -277,7 +277,13 @@ async function fetchOverpass(query, { attempts = 6, fetchImpl = fetch, sleepImpl
         signal: ctrl.signal,
       });
       if (!res.ok) throw new Error(`${endpoint} -> HTTP ${res.status}`);
-      return await res.json();
+      const data = await res.json();
+      // Overpass answers HTTP 200 with a `remark` and partial data when a query
+      // times out or runs out of memory. Treat that as a failure, not a result.
+      if (data.remark && /error|timed out|out of memory/i.test(data.remark)) {
+        throw new Error(`${endpoint} -> incomplete result (${String(data.remark).slice(0, 80)})`);
+      }
+      return data;
     } catch (e) {
       lastErr = e;
       const wait = Math.min(15000 * (i + 1), 60000);
@@ -438,6 +444,12 @@ async function testFetchTile(assert) {
     const r2 = await fetchTile(tileQueryOperators, [49, -3, 50.5, 2], { fetchImpl: allFail, sleepImpl: noSleep });
     console.error = quiet;
     assert(r2.elements.length === 0 && r2.failed.length === 4, 'fetchTile reports failed boxes instead of throwing');
+    console.error = () => {};
+    // HTTP 200 with a timeout remark is a failure, not an empty result
+    const partial = async () => ({ ok: true, json: async () => ({ elements: [{ id: 1 }], remark: 'runtime error: Query timed out in "query" at line 3 after 121 seconds.' }) });
+    const r3 = await fetchTile(tileQueryOperators, [49, -3, 50.5, 2], { fetchImpl: partial, sleepImpl: noSleep });
+    console.error = quiet;
+    assert(r3.elements.length === 0 && r3.failed.length === 4, 'fetchOverpass rejects partial results that carry a timeout remark');
   } finally {
     console.error = quiet;
   }
@@ -475,7 +487,7 @@ async function main() {
   // Safety net: never publish a database that has lost a large share of its
   // sites in one run — that means a bad import, not a real-world change.
   const before = existing.sites.filter((x) => x.source === 'osm').length;
-  if (before > 0 && merged.stats.osm < before * 0.9) {
+  if (before > 0 && merged.stats.osm < before * 0.95) {
     throw new Error(`Import would shrink OSM sites from ${before} to ${merged.stats.osm} — refusing to write.`);
   }
 
