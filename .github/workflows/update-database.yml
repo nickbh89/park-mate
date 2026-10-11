@@ -34,5 +34,7 @@ jobs:
           else
             git add src/data/parkingSites.json
             git commit -m "Update national site database from OSM import [skip ci]"
+            # Other commits may land on main while the import runs; replay ours on top.
+            git pull --rebase origin main
             git push
           fi
