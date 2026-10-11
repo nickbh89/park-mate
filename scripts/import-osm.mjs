@@ -9,6 +9,9 @@
 //      which are routinely ANPR-enforced under national contracts
 //   3. maxstay-tagged with no operator: free-max-stay sites, enforcement
 //      unverified (low confidence)
+//   4. adjacent: untagged car parks sitting next to a place that is routinely
+//      enforced (chain stores, retail parks, hospitals, stations, services).
+//      Likely enforced, never confirmed — low confidence, no time limit.
 // Maps them to the ParkMate schema, merges with the hand-curated seed sites
 // (curated always wins), and rewrites src/data/parkingSites.json.
 //
@@ -225,6 +228,142 @@ export function elementToSite(el, klass = 'operator') {
     notes,
   };
 }
+// Chains whose car parks are routinely run by a private enforcement operator.
+// POSIX ERE, matched against the brand tag.
+const ANCHOR_BRAND_RE = [
+  'Aldi', 'Lidl', 'Tesco', 'Asda', 'Morrisons', 'Sainsbury', 'Waitrose', 'Co-op', 'Iceland',
+  'Farmfoods', 'Booths', 'Marks & Spencer', 'M&S', 'Home Bargains', 'B&M', 'The Range',
+  'Matalan', 'Dunelm', 'B&Q', 'Wickes', 'Homebase', 'Halfords', 'Currys', 'Pets at Home',
+  'Costco', 'IKEA', 'Next', 'TK Maxx', 'Smyths', 'Poundland', 'Wilko', 'Argos', 'Decathlon',
+  'Hobbycraft', 'Sports Direct', 'JD Sports', 'Boots', 'Carpetright', 'DFS', 'Dreams',
+  "McDonald's", 'KFC', 'Burger King', 'Costa', 'Starbucks', 'Greggs', 'Subway', "Nando's",
+  'Pizza Hut', 'Taco Bell', "Wendy's", 'Popeyes', 'Tim Hortons', 'Five Guys',
+  'PureGym', 'The Gym', 'JD Gyms', 'Nuffield Health', 'David Lloyd', 'Bannatyne', 'Anytime Fitness',
+  'Odeon', 'Cineworld', 'Vue', 'Showcase', 'Premier Inn', 'Travelodge',
+].join('|');
+
+// Step 1 collects the anchors, step 2 the car parks within 60 m of any anchor.
+// Both sets come back so each car park can be named after its nearest anchor.
+const tileQueryAdjacent = ([s, w, n, e]) => `
+[out:json][timeout:170];
+(
+  nwr["brand"~"${ANCHOR_BRAND_RE}",i]["shop"](${s},${w},${n},${e});
+  nwr["brand"~"${ANCHOR_BRAND_RE}",i]["amenity"~"^(fast_food|restaurant|cafe|cinema)$"](${s},${w},${n},${e});
+  nwr["brand"~"${ANCHOR_BRAND_RE}",i]["leisure"="fitness_centre"](${s},${w},${n},${e});
+  nwr["brand"~"${ANCHOR_BRAND_RE}",i]["tourism"="hotel"](${s},${w},${n},${e});
+  nwr["landuse"="retail"]["name"](${s},${w},${n},${e});
+  nwr["shop"="mall"](${s},${w},${n},${e});
+  nwr["amenity"="hospital"](${s},${w},${n},${e});
+  nwr["railway"="station"]["station"!~"subway|light_rail"](${s},${w},${n},${e});
+  nwr["highway"="services"](${s},${w},${n},${e});
+)->.anchors;
+.anchors out center tags;
+nwr["amenity"="parking"](around.anchors:60)(${s},${w},${n},${e});
+out center tags;
+`;
+
+/** What kind of place an anchor is, for the site note. */
+export function anchorKind(tags = {}) {
+  if (tags.amenity === 'hospital') return 'hospital';
+  if (tags.railway === 'station') return 'railway station';
+  if (tags.highway === 'services') return 'motorway services';
+  if (tags.landuse === 'retail' || tags.shop === 'mall') return 'retail park';
+  if (tags.leisure === 'fitness_centre') return 'gym';
+  if (tags.tourism === 'hotel') return 'hotel';
+  if (tags.amenity === 'cinema') return 'cinema';
+  if (tags.amenity) return 'restaurant';
+  return 'store';
+}
+
+const NOT_PUBLIC_ACCESS = /^(private|no|permit|residents|staff|employees|delivery)$/;
+const NOT_A_CAR_PARK = /^(street_side|lane|on_street|on_kerb|half_on_kerb|shoulder)$/;
+const COUNCIL_OPERATOR = /council|borough|city of|county|district|transport for|network rail|nhs/i;
+const ADJACENT_NOTE = 'likely enforced, check signage';
+// Small-format and high-street outlets: the nearest car park is as likely to be
+// a council one, so these only count when the car park is tagged for customers.
+const SMALL_FORMAT = /subway|greggs|costa|starbucks|boots|poundland|argos|jd sports|sports direct|nando|pizza hut|five guys|hobbycraft|next|carpetright|dreams|express|local|metro|little waitrose|simply food|one stop|daily/i;
+const isStrongAnchor = (t) => t.amenity === 'hospital' || t.railway === 'station' || t.highway === 'services' || t.landuse === 'retail' || t.shop === 'mall';
+
+/** Turn the mixed anchor + car park result of tileQueryAdjacent into sites.
+ *  Each car park is attributed to its nearest anchor (centre to centre, up to
+ *  400 m because retail parks and hospitals are large). */
+export function adjacentSites(elements) {
+  const centre = (el) => ({ lat: el.lat ?? el.center?.lat, lng: el.lon ?? el.center?.lon });
+  const anchors = [];
+  const parks = [];
+  for (const el of elements) {
+    const { lat, lng } = centre(el);
+    if (typeof lat !== 'number' || typeof lng !== 'number') continue;
+    if (el.tags?.amenity === 'parking') parks.push({ el, lat, lng });
+    else if (el.tags && (el.tags.name || el.tags.brand)) anchors.push({ tags: el.tags, lat, lng });
+  }
+  const out = [];
+  for (const { el, lat, lng } of parks) {
+    const tags = el.tags;
+    if (!inBounds(lat, lng)) continue;
+    if (tags.access && NOT_PUBLIC_ACCESS.test(tags.access)) continue;
+    if (tags.parking && NOT_A_CAR_PARK.test(tags.parking)) continue;
+    if (tags.operator && COUNCIL_OPERATOR.test(tags.operator) && !mapOperator(tags.operator)) continue;
+    let best = null;
+    let bestD = 400;
+    const forCustomers = tags.access === 'customers';
+    for (const a of anchors) {
+      if (!forCustomers && !isStrongAnchor(a.tags) && SMALL_FORMAT.test(`${a.tags.brand || ''} ${a.tags.name || ''}`)) continue;
+      if (Math.abs(a.lat - lat) > 0.004 || Math.abs(a.lng - lng) > 0.007) continue; // cheap reject
+      const d = haversineM(lat, lng, a.lat, a.lng);
+      if (d < bestD) { best = a; bestD = d; }
+    }
+    if (!best) continue;
+    const label = best.tags.name || best.tags.brand;
+    const brand = mapBrand(best.tags.brand || best.tags.name);
+    const maxStayMinutes = parseMaxstay(tags.maxstay);
+    out.push({
+      id: `osm-${el.type}-${el.id}`,
+      name: tags.name || `${label} car park`,
+      town: tags['addr:city'] || tags['addr:town'] || best.tags['addr:city'] || best.tags['addr:town'] || '',
+      operatorId: mapOperator(tags.operator) || brand?.operatorId || null,
+      lat: Number(lat.toFixed(5)),
+      lng: Number(lng.toFixed(5)),
+      radiusM: 100,
+      siteType: maxStayMinutes ? 'free-max-stay' : tags.fee === 'yes' ? 'pay-and-display' : 'customer-only',
+      maxStayMinutes,
+      confidence: 'low',
+      verified: false,
+      source: 'osm',
+      osmRef: `${el.type}/${el.id}`,
+      notes: `Next to ${label} (${anchorKind(best.tags)}) — ${ADJACENT_NOTE}`,
+    });
+  }
+  return out;
+}
+
+/** Drop adjacent candidates that sit within minGapM of a site already kept
+ *  (a confirmed site, or an earlier candidate). Big stores are often mapped as
+ *  several parking polygons; without this each would fire its own alert. */
+export function thinAdjacent(candidates, kept, minGapM = 150) {
+  const cell = 0.003; // ~330 m of latitude; neighbours cover the gap
+  const grid = new Map();
+  const key = (lat, lng) => `${Math.floor(lat / cell)}:${Math.floor(lng / cell)}`;
+  const add = (s) => { const k = key(s.lat, s.lng); if (!grid.has(k)) grid.set(k, []); grid.get(k).push(s); };
+  kept.forEach(add);
+  const out = [];
+  for (const c of [...candidates].sort((a, b) => a.id.localeCompare(b.id))) {
+    const gy = Math.floor(c.lat / cell);
+    const gx = Math.floor(c.lng / cell);
+    let clash = false;
+    for (let dy = -1; dy <= 1 && !clash; dy++) {
+      for (let dx = -2; dx <= 2 && !clash; dx++) {
+        for (const s of grid.get(`${gy + dy}:${gx + dx}`) || []) {
+          if (s.id !== c.id && haversineM(c.lat, c.lng, s.lat, s.lng) < minGapM) { clash = true; break; }
+        }
+      }
+    }
+    if (clash) continue;
+    add(c);
+    out.push(c);
+  }
+  return out;
+}
 
 export function haversineM(lat1, lng1, lat2, lng2) {
   const toRad = (d) => (d * Math.PI) / 180;
@@ -313,7 +452,7 @@ export function splitTile([s, w, n, e]) {
 const MAX_SPLIT_DEPTH = 1;
 // Overall time budget for network work. Once it is spent, remaining boxes are
 // skipped (and their existing sites kept) so a bad day cannot run for hours.
-const RUN_BUDGET_MS = 60 * 60 * 1000;
+const RUN_BUDGET_MS = 110 * 60 * 1000;
 const runStarted = Date.now();
 const budgetSpent = () => Date.now() - runStarted > RUN_BUDGET_MS;
 export async function fetchTile(buildQuery, tile, opts = {}, depth = 0) {
@@ -344,29 +483,31 @@ export async function fetchTile(buildQuery, tile, opts = {}, depth = 0) {
 
 /** Fetch every tile for a query builder, politely (pause between tiles).
  *  Returns the elements plus the list of boxes that could not be fetched. */
-async function fetchTiles(buildQuery, label) {
+async function fetchTiles(buildQuery, label, tiles = TILES) {
   const elements = [];
   const failed = [];
-  for (const [idx, tile] of TILES.entries()) {
-    console.log(`  ${label}: tile ${idx + 1}/${TILES.length} [${tile.join(', ')}]`);
+  for (const [idx, tile] of tiles.entries()) {
+    console.log(`  ${label}: tile ${idx + 1}/${tiles.length} [${tile.join(', ')}]`);
     const r = await fetchTile(buildQuery, tile);
     elements.push(...r.elements);
     failed.push(...r.failed);
-    if (idx < TILES.length - 1) await sleep(8000);
+    if (idx < tiles.length - 1) await sleep(8000);
   }
   return { elements, failed };
 }
 
 const inBox = (site, [s, w, n, e]) => site.lat >= s && site.lat <= n && site.lng >= w && site.lng <= e;
 const isMaxstayClass = (site) => site.operatorId === null && /operator untagged/.test(site.notes || '');
+const isAdjacentClass = (site) => (site.notes || '').includes(ADJACENT_NOTE);
 
 /** Sites from the previous database to keep because the box they sit in could
  *  not be refreshed this run. Without this a failed box would silently delete
  *  every car park inside it. */
-export function carryOver(existing, failedOperatorBoxes, failedMaxstayBoxes) {
+export function carryOver(existing, failedOperatorBoxes, failedMaxstayBoxes, failedAdjacentBoxes = []) {
   return existing.sites.filter((site) => {
     if (site.source !== 'osm') return false;
-    const boxes = isMaxstayClass(site) ? failedMaxstayBoxes : failedOperatorBoxes;
+    const boxes = isAdjacentClass(site) ? failedAdjacentBoxes
+      : isMaxstayClass(site) ? failedMaxstayBoxes : failedOperatorBoxes;
     return boxes.some((box) => inBox(site, box));
   });
 }
@@ -419,6 +560,31 @@ async function runTest(existing) {
   assert(carryOver(prev, [], []).length === 0, 'carryOver keeps nothing when no box failed');
   const quads = splitTile([49, -3, 50.5, 2]);
   assert(quads.length === 4 && quads[0][2] === 49.75 && quads[3][1] === -0.5, 'splitTile makes four quadrants');
+  // adjacent pass
+  const adjEls = [
+    { type: 'way', id: 100, center: { lat: 53.2000, lon: -2.5000 }, tags: { shop: 'supermarket', brand: 'Aldi', name: 'Aldi' } },
+    { type: 'way', id: 101, center: { lat: 53.2003, lon: -2.5003 }, tags: { amenity: 'parking' } },                       // next to Aldi
+    { type: 'way', id: 102, center: { lat: 53.2005, lon: -2.5006 }, tags: { amenity: 'parking' } },                       // second polygon, same store
+    { type: 'way', id: 103, center: { lat: 53.2002, lon: -2.4998 }, tags: { amenity: 'parking', access: 'private' } },    // staff only
+    { type: 'way', id: 104, center: { lat: 53.2001, lon: -2.5001 }, tags: { amenity: 'parking', parking: 'street_side' } },
+    { type: 'way', id: 105, center: { lat: 53.2004, lon: -2.5002 }, tags: { amenity: 'parking', operator: 'Cheshire West and Chester Council' } },
+    { type: 'node', id: 110, lat: 53.4000, lon: -2.2000, tags: { amenity: 'hospital', name: 'Test General Hospital' } },
+    { type: 'way', id: 111, center: { lat: 53.4010, lon: -2.2010 }, tags: { amenity: 'parking', fee: 'yes' } },
+    { type: 'way', id: 120, center: { lat: 54.9000, lon: -1.6000 }, tags: { amenity: 'parking' } },                       // no anchor nearby
+    { type: 'node', id: 130, lat: 52.0000, lon: -1.0000, tags: { shop: 'convenience', brand: 'Tesco', name: 'Tesco Express' } },
+    { type: 'way', id: 131, center: { lat: 52.0003, lon: -1.0003 }, tags: { amenity: 'parking' } },                       // high-street store, untagged car park
+  ];
+  const adj = adjacentSites(adjEls);
+  assert(adj.map((x) => x.id).join() === 'osm-way-101,osm-way-102,osm-way-111', `adjacentSites keeps public car parks beside anchors (got ${adj.map((x) => x.id).join()})`);
+  const a101 = adj.find((x) => x.id === 'osm-way-101');
+  assert(a101.name === 'Aldi car park' && a101.operatorId === 'parkingeye' && a101.confidence === 'low' && a101.siteType === 'customer-only', 'adjacent Aldi site: named, ParkingEye, low confidence, customer-only');
+  assert(adj.find((x) => x.id === 'osm-way-111').siteType === 'pay-and-display' && /hospital/.test(adj.find((x) => x.id === 'osm-way-111').notes), 'adjacent hospital site: pay-and-display, note names the hospital');
+  const thinned = thinAdjacent(adj, []);
+  assert(thinned.map((x) => x.id).join() === 'osm-way-101,osm-way-111', 'thinAdjacent keeps one site per store');
+  assert(thinAdjacent(adj, [{ id: 'cur', lat: 53.2003, lng: -2.5003 }]).map((x) => x.id).join() === 'osm-way-111', 'thinAdjacent drops candidates beside an existing site');
+  assert(carryOver({ sites: [{ id: 'x', source: 'osm', lat: 50, lng: 0, operatorId: null, notes: adj[0].notes }] }, [], [], [box]).length === 1, 'carryOver keeps adjacent-class sites in a failed adjacent box');
+  const round = JSON.parse(serialise({ schemaVersion: 1, sites: adj, stats: { osm: 3 } }));
+  assert(round.sites.length === 3 && round.stats.osm === 3 && round.schemaVersion === 1, 'serialise writes valid JSON that round-trips');
   await testFetchTile(assert);
   console.log(process.exitCode ? 'TESTS FAILED' : 'All import tests passed');
 }
@@ -455,6 +621,14 @@ async function testFetchTile(assert) {
   }
 }
 
+/** One site per line: valid JSON, a fifth of the size of full pretty-printing,
+ *  and still gives readable line-by-line diffs. */
+export function serialise(db) {
+  const { sites, ...head } = db;
+  const top = JSON.stringify(head, null, 2).replace(/\n}$/, '');
+  return `${top},\n  "sites": [\n${sites.map((x) => '    ' + JSON.stringify(x)).join(',\n')}\n  ]\n}\n`;
+}
+
 async function main() {
   const existing = JSON.parse(readFileSync(SITES_PATH, 'utf8'));
   const mode = process.argv[2];
@@ -475,13 +649,29 @@ async function main() {
     throw new Error('Overpass returned nothing for any tile — database left unchanged.');
   }
 
-  const kept = carryOver(existing, op.failed, ms.failed);
+  // The adjacent pass is the heaviest query, so it runs on quarter tiles.
+  console.log('Querying Overpass: car parks next to stores, retail parks, hospitals, stations (quarter tiles)…');
+  const adj = await fetchTiles(tileQueryAdjacent, 'adjacent', TILES.flatMap(splitTile));
+  const adjRaw = adjacentSites(adj.elements);
+  console.log(`  ${adj.elements.length} elements -> ${adjRaw.length} candidate sites`);
+
+  const kept = carryOver(existing, op.failed, ms.failed, adj.failed);
   if (kept.length) {
-    const n = op.failed.length + ms.failed.length;
+    const n = op.failed.length + ms.failed.length + adj.failed.length;
     console.log(`::warning::${n} box(es) could not be refreshed; kept ${kept.length} existing sites inside them.`);
   }
 
-  const merged = merge(existing, [...opSites, ...msSites, ...kept]);
+  // Confirmed sites first; adjacent candidates only fill the gaps between them.
+  const confirmed = [...opSites, ...msSites, ...kept.filter((x) => !isAdjacentClass(x))];
+  const confirmedIds = new Set(confirmed.map((x) => x.id));
+  const curatedSites = existing.sites.filter((x) => x.source !== 'osm');
+  const adjSites = thinAdjacent(
+    [...adjRaw, ...kept.filter(isAdjacentClass)].filter((x) => !confirmedIds.has(x.id)),
+    [...curatedSites, ...confirmed],
+  );
+  console.log(`  ${adjSites.length} adjacent sites kept after removing overlaps`);
+
+  const merged = merge(existing, [...confirmed, ...adjSites]);
   console.log(`Merged database: ${merged.stats.curated} curated + ${merged.stats.osm} OSM = ${merged.sites.length} sites`);
 
   // Safety net: never publish a database that has lost a large share of its
@@ -492,7 +682,7 @@ async function main() {
   }
 
   if (mode === '--dry-run') return console.log('Dry run — nothing written.');
-  writeFileSync(SITES_PATH, JSON.stringify(merged, null, 2) + '\n');
+  writeFileSync(SITES_PATH, serialise(merged));
   console.log(`Wrote ${SITES_PATH}`);
 }
 
