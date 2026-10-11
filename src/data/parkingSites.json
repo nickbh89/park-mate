@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "effectiveDate": "2026-09-14",
+  "effectiveDate": "2026-10-11",
   "region": "United Kingdom, Isle of Man & Channel Islands (curated + OSM import)",
   "disclaimer": "Seed data compiled by research, not survey. Coordinates are approximate site centroids and operator attributions / max-stay values reflect commonly reported terms which change without notice. Every entry MUST be field-verified (signage is the legal source of truth) before public release. verified:false marks unsurveyed entries.",
   "defaults": {
@@ -2691,7 +2691,7 @@
     {
       "id": "osm-node-8175751317",
       "name": "Q-Park The Light",
-      "town": "",
+      "town": "Leeds",
       "operatorId": "q-park",
       "lat": 53.80019,
       "lng": -1.54629,
@@ -3697,6 +3697,22 @@
       "notes": "Sainsbury's store car park — commonly ANPR-enforced under contract"
     },
     {
+      "id": "osm-relation-21423781",
+      "name": "Euro Car Parks- Swallow Street",
+      "town": "",
+      "operatorId": "euro-car-parks",
+      "lat": 52.47851,
+      "lng": -1.90304,
+      "radiusM": 120,
+      "siteType": "pay-and-display",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "relation/21423781",
+      "notes": "OSM maxstay: 1 day"
+    },
+    {
       "id": "osm-relation-2581578",
       "name": "West Street Car Park",
       "town": "",
@@ -3727,6 +3743,22 @@
       "source": "osm",
       "osmRef": "relation/3126731",
       "notes": "OSM maxstay: 24 hours — operator untagged, enforcement unverified"
+    },
+    {
+      "id": "osm-relation-3333690",
+      "name": "Mount Street Car Park",
+      "town": "",
+      "operatorId": "ncp",
+      "lat": 52.95295,
+      "lng": -1.15484,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "relation/3333690",
+      "notes": ""
     },
     {
       "id": "osm-relation-3739633",
@@ -4639,6 +4671,22 @@
       "source": "osm",
       "osmRef": "way/1027235396",
       "notes": "Lidl store car park — Lidl sites are widely managed by Athena ANPR"
+    },
+    {
+      "id": "osm-way-102859908",
+      "name": "Private car park",
+      "town": "",
+      "operatorId": null,
+      "lat": 54.61983,
+      "lng": -1.57053,
+      "radiusM": 120,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 120,
+      "confidence": "low",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/102859908",
+      "notes": "OSM maxstay: 2 hours — operator untagged, enforcement unverified"
     },
     {
       "id": "osm-way-1029007666",
@@ -6088,13 +6136,13 @@
       "lat": 54.62089,
       "lng": -1.57081,
       "radiusM": 120,
-      "siteType": "customer-only",
-      "maxStayMinutes": null,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 40,
       "confidence": "medium",
       "verified": false,
       "source": "osm",
       "osmRef": "way/1073133136",
-      "notes": "Aldi store car park — Aldi sites are nationally managed by ParkingEye ANPR"
+      "notes": "Aldi store car park — Aldi sites are nationally managed by ParkingEye ANPR · OSM maxstay: 40 minutes"
     },
     {
       "id": "osm-way-1074578143",
@@ -7249,6 +7297,22 @@
       "notes": ""
     },
     {
+      "id": "osm-way-1121011034",
+      "name": "Private car park",
+      "town": "",
+      "operatorId": null,
+      "lat": 53.16597,
+      "lng": -2.21142,
+      "radiusM": 120,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 90,
+      "confidence": "low",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1121011034",
+      "notes": "OSM maxstay: 1.5 hours — operator untagged, enforcement unverified"
+    },
+    {
       "id": "osm-way-1123419282",
       "name": "Tesco car park",
       "town": "",
@@ -8338,7 +8402,7 @@
     },
     {
       "id": "osm-way-1175502890",
-      "name": "St Catherines Close car park",
+      "name": "St Catherines Close",
       "town": "",
       "operatorId": null,
       "lat": 51.09121,
@@ -10673,22 +10737,6 @@
       "notes": ""
     },
     {
-      "id": "osm-way-1249067461",
-      "name": "Derby Mansfield Road",
-      "town": "Derby",
-      "operatorId": "ncp",
-      "lat": 52.92773,
-      "lng": -1.47463,
-      "radiusM": 120,
-      "siteType": "pay-and-display",
-      "maxStayMinutes": null,
-      "confidence": "medium",
-      "verified": false,
-      "source": "osm",
-      "osmRef": "way/1249067461",
-      "notes": ""
-    },
-    {
       "id": "osm-way-1249416558",
       "name": "National Car Parks car park",
       "town": "",
@@ -12949,8 +12997,8 @@
       "name": "Euro Car Parks car park",
       "town": "",
       "operatorId": "euro-car-parks",
-      "lat": 53.95883,
-      "lng": -2.02304,
+      "lat": 53.95885,
+      "lng": -2.02301,
       "radiusM": 120,
       "siteType": "free-max-stay",
       "maxStayMinutes": 150,
@@ -14006,7 +14054,7 @@
       "town": "",
       "operatorId": "parkingeye",
       "lat": 53.58682,
-      "lng": -2.66522,
+      "lng": -2.66528,
       "radiusM": 120,
       "siteType": "customer-only",
       "maxStayMinutes": null,
@@ -14805,8 +14853,8 @@
       "name": "Aldi car park",
       "town": "",
       "operatorId": "parkingeye",
-      "lat": 53.65334,
-      "lng": -1.82197,
+      "lat": 53.65333,
+      "lng": -1.82183,
       "radiusM": 120,
       "siteType": "customer-only",
       "maxStayMinutes": null,
@@ -16514,19 +16562,19 @@
     },
     {
       "id": "osm-way-1458713302",
-      "name": "Tesco car park",
+      "name": "Tesco Express Parking",
       "town": "",
-      "operatorId": null,
+      "operatorId": "ncp",
       "lat": 51.92793,
       "lng": -0.20831,
       "radiusM": 120,
       "siteType": "customer-only",
       "maxStayMinutes": null,
-      "confidence": "low",
+      "confidence": "medium",
       "verified": false,
       "source": "osm",
       "osmRef": "way/1458713302",
-      "notes": "Tesco store car park — commonly ANPR-enforced under contract"
+      "notes": ""
     },
     {
       "id": "osm-way-145984767",
@@ -18054,7 +18102,7 @@
       "town": "",
       "operatorId": null,
       "lat": 52.50844,
-      "lng": -2.08849,
+      "lng": -2.08848,
       "radiusM": 120,
       "siteType": "customer-only",
       "maxStayMinutes": null,
@@ -18625,6 +18673,22 @@
       "notes": "Morrisons store car park — commonly ANPR-enforced under contract"
     },
     {
+      "id": "osm-way-1548615067",
+      "name": "Private car park",
+      "town": "",
+      "operatorId": null,
+      "lat": 52.34279,
+      "lng": -3.04682,
+      "radiusM": 120,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 120,
+      "confidence": "low",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1548615067",
+      "notes": "OSM maxstay: 2 hours — operator untagged, enforcement unverified"
+    },
+    {
       "id": "osm-way-154871348",
       "name": "Trostre South Retail Park",
       "town": "",
@@ -18671,6 +18735,22 @@
       "source": "osm",
       "osmRef": "way/154962992",
       "notes": "OSM maxstay: 4 hours — operator untagged, enforcement unverified"
+    },
+    {
+      "id": "osm-way-1549630072",
+      "name": "Aldi car park",
+      "town": "",
+      "operatorId": "parkingeye",
+      "lat": 54.75615,
+      "lng": -1.61127,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1549630072",
+      "notes": "Aldi store car park — Aldi sites are nationally managed by ParkingEye ANPR"
     },
     {
       "id": "osm-way-1550017050",
@@ -18734,7 +18814,7 @@
       "verified": false,
       "source": "osm",
       "osmRef": "way/1551178534",
-      "notes": "OSM maxstay: 3 hour — operator untagged, enforcement unverified"
+      "notes": "OSM maxstay: 3 hours — operator untagged, enforcement unverified"
     },
     {
       "id": "osm-way-155224833",
@@ -18913,6 +18993,54 @@
       "notes": "OSM maxstay: 10 minutes — operator untagged, enforcement unverified"
     },
     {
+      "id": "osm-way-1559298061",
+      "name": "Euro Car Parks car park",
+      "town": "",
+      "operatorId": "euro-car-parks",
+      "lat": 51.3567,
+      "lng": 1.02328,
+      "radiusM": 120,
+      "siteType": "pay-and-display",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1559298061",
+      "notes": ""
+    },
+    {
+      "id": "osm-way-1561677012",
+      "name": "Patient Parking",
+      "town": "",
+      "operatorId": null,
+      "lat": 56.77609,
+      "lng": -2.61486,
+      "radiusM": 120,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 240,
+      "confidence": "low",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1561677012",
+      "notes": "OSM maxstay: 4 hours — operator untagged, enforcement unverified"
+    },
+    {
+      "id": "osm-way-1561677033",
+      "name": "Patient Parking",
+      "town": "",
+      "operatorId": null,
+      "lat": 56.77607,
+      "lng": -2.61497,
+      "radiusM": 120,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 240,
+      "confidence": "low",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1561677033",
+      "notes": "OSM maxstay: 4 hours — operator untagged, enforcement unverified"
+    },
+    {
       "id": "osm-way-156267847",
       "name": "Three Bridges Station",
       "town": "",
@@ -18927,6 +19055,22 @@
       "source": "osm",
       "osmRef": "way/156267847",
       "notes": ""
+    },
+    {
+      "id": "osm-way-1563151504",
+      "name": "Lidl car park",
+      "town": "",
+      "operatorId": "athena",
+      "lat": 53.37186,
+      "lng": -1.37216,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1563151504",
+      "notes": "Lidl store car park — Lidl sites are widely managed by Athena ANPR"
     },
     {
       "id": "osm-way-156336697",
@@ -18975,6 +19119,134 @@
       "source": "osm",
       "osmRef": "way/156370201",
       "notes": ""
+    },
+    {
+      "id": "osm-way-1564562959",
+      "name": "McDonald's car park",
+      "town": "",
+      "operatorId": "met-parking",
+      "lat": 52.40557,
+      "lng": -4.06576,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1564562959",
+      "notes": "McDonald's car park — commonly managed by MET Parking Services ANPR"
+    },
+    {
+      "id": "osm-way-1565311178",
+      "name": "Tesco Customer Car Park",
+      "town": "",
+      "operatorId": "horizon",
+      "lat": 55.93965,
+      "lng": -4.31642,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1565311178",
+      "notes": ""
+    },
+    {
+      "id": "osm-way-1565781185",
+      "name": "Goods In HGV Parking",
+      "town": "",
+      "operatorId": "athena",
+      "lat": 50.93249,
+      "lng": -1.4724,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1565781185",
+      "notes": "Lidl store car park — Lidl sites are widely managed by Athena ANPR"
+    },
+    {
+      "id": "osm-way-1565781191",
+      "name": "Goods Out HGV Parking",
+      "town": "",
+      "operatorId": "athena",
+      "lat": 50.93243,
+      "lng": -1.46926,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1565781191",
+      "notes": "Lidl store car park — Lidl sites are widely managed by Athena ANPR"
+    },
+    {
+      "id": "osm-way-1565790000",
+      "name": "Inbound HGV Parking",
+      "town": "",
+      "operatorId": "athena",
+      "lat": 51.91739,
+      "lng": -0.49037,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1565790000",
+      "notes": "Lidl store car park — Lidl sites are widely managed by Athena ANPR"
+    },
+    {
+      "id": "osm-way-1565790001",
+      "name": "Outbound HGV Parking",
+      "town": "",
+      "operatorId": "athena",
+      "lat": 51.91701,
+      "lng": -0.49099,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1565790001",
+      "notes": "Lidl store car park — Lidl sites are widely managed by Athena ANPR"
+    },
+    {
+      "id": "osm-way-1565790002",
+      "name": "Employee Parking",
+      "town": "",
+      "operatorId": "athena",
+      "lat": 51.9166,
+      "lng": -0.4919,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1565790002",
+      "notes": "Lidl store car park — Lidl sites are widely managed by Athena ANPR"
+    },
+    {
+      "id": "osm-way-1565790009",
+      "name": "Lidl Luton car park",
+      "town": "",
+      "operatorId": "athena",
+      "lat": 51.91818,
+      "lng": -0.4925,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/1565790009",
+      "notes": "Lidl store car park — Lidl sites are widely managed by Athena ANPR"
     },
     {
       "id": "osm-way-156792662",
@@ -19857,22 +20129,6 @@
       "notes": "Tesco store car park — commonly ANPR-enforced under contract"
     },
     {
-      "id": "osm-way-16532790",
-      "name": "Maid Marian Way Car Park",
-      "town": "",
-      "operatorId": "ncp",
-      "lat": 52.94956,
-      "lng": -1.15048,
-      "radiusM": 120,
-      "siteType": "pay-and-display",
-      "maxStayMinutes": null,
-      "confidence": "medium",
-      "verified": false,
-      "source": "osm",
-      "osmRef": "way/16532790",
-      "notes": ""
-    },
-    {
       "id": "osm-way-165331945",
       "name": "McDonalds car park",
       "town": "",
@@ -20031,6 +20287,22 @@
       "source": "osm",
       "osmRef": "way/167484073",
       "notes": "OSM maxstay: 3 hours — operator untagged, enforcement unverified"
+    },
+    {
+      "id": "osm-way-167711487",
+      "name": "Euro Car Parks car park",
+      "town": "",
+      "operatorId": "euro-car-parks",
+      "lat": 53.8155,
+      "lng": -1.60368,
+      "radiusM": 120,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 90,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/167711487",
+      "notes": "OSM maxstay: 1.5 hours"
     },
     {
       "id": "osm-way-167862585",
@@ -20591,6 +20863,22 @@
       "source": "osm",
       "osmRef": "way/176559310",
       "notes": "OSM maxstay: 180 — operator untagged, enforcement unverified"
+    },
+    {
+      "id": "osm-way-176887206",
+      "name": "Long Buckby Railway Station Premium parking",
+      "town": "",
+      "operatorId": "saba",
+      "lat": 52.29504,
+      "lng": -1.08682,
+      "radiusM": 120,
+      "siteType": "pay-and-display",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/176887206",
+      "notes": ""
     },
     {
       "id": "osm-way-177546023",
@@ -21656,13 +21944,13 @@
       "lat": 50.72544,
       "lng": -1.23138,
       "radiusM": 120,
-      "siteType": "customer-only",
-      "maxStayMinutes": null,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 30,
       "confidence": "low",
       "verified": false,
       "source": "osm",
       "osmRef": "way/193198669",
-      "notes": "Tesco store car park — commonly ANPR-enforced under contract"
+      "notes": "Tesco store car park — commonly ANPR-enforced under contract · OSM maxstay: 30 minutes"
     },
     {
       "id": "osm-way-193297191",
@@ -21695,22 +21983,6 @@
       "source": "osm",
       "osmRef": "way/194526926",
       "notes": "KFC car park — commonly ANPR-enforced under contract"
-    },
-    {
-      "id": "osm-way-194902292",
-      "name": "Euro Car Parks car park",
-      "town": "",
-      "operatorId": "euro-car-parks",
-      "lat": 51.35661,
-      "lng": 1.02333,
-      "radiusM": 120,
-      "siteType": "pay-and-display",
-      "maxStayMinutes": null,
-      "confidence": "medium",
-      "verified": false,
-      "source": "osm",
-      "osmRef": "way/194902292",
-      "notes": ""
     },
     {
       "id": "osm-way-195108909",
@@ -26325,8 +26597,8 @@
       "name": "Asda Stores Ltd car park",
       "town": "",
       "operatorId": null,
-      "lat": 54.63301,
-      "lng": -6.74432,
+      "lat": 54.63302,
+      "lng": -6.74433,
       "radiusM": 120,
       "siteType": "customer-only",
       "maxStayMinutes": null,
@@ -26387,18 +26659,18 @@
     {
       "id": "osm-way-255708461",
       "name": "Westgate Retail Park",
-      "town": "",
+      "town": "Wakefield",
       "operatorId": "parkingeye",
-      "lat": 53.67943,
-      "lng": -1.50604,
+      "lat": 53.67942,
+      "lng": -1.50603,
       "radiusM": 120,
       "siteType": "free-max-stay",
-      "maxStayMinutes": 120,
+      "maxStayMinutes": 180,
       "confidence": "medium",
       "verified": false,
       "source": "osm",
       "osmRef": "way/255708461",
-      "notes": "OSM maxstay: 2 hours"
+      "notes": "OSM maxstay: 3 hours"
     },
     {
       "id": "osm-way-255807871",
@@ -27522,19 +27794,19 @@
     },
     {
       "id": "osm-way-27151064",
-      "name": "YourParkingSpace",
+      "name": "Customer Only Car Park",
       "town": "",
       "operatorId": null,
       "lat": 53.41371,
       "lng": -2.83626,
       "radiusM": 120,
-      "siteType": "customer-only",
-      "maxStayMinutes": null,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 180,
       "confidence": "low",
       "verified": false,
       "source": "osm",
       "osmRef": "way/27151064",
-      "notes": "Asda store car park — commonly ANPR-enforced under contract"
+      "notes": "Asda store car park — commonly ANPR-enforced under contract · OSM maxstay: 3 hours"
     },
     {
       "id": "osm-way-27171648",
@@ -30067,7 +30339,7 @@
     {
       "id": "osm-way-308287778",
       "name": "Meigh Street",
-      "town": "",
+      "town": "Stoke-on-Trent",
       "operatorId": "ncp",
       "lat": 53.02673,
       "lng": -2.17317,
@@ -30083,7 +30355,7 @@
     {
       "id": "osm-way-308296579",
       "name": "Glass Street",
-      "town": "",
+      "town": "Stoke-on-Trent",
       "operatorId": "ncp",
       "lat": 53.02723,
       "lng": -2.17325,
@@ -31201,22 +31473,6 @@
       "notes": "OSM maxstay: 3 hours — operator untagged, enforcement unverified"
     },
     {
-      "id": "osm-way-33101534",
-      "name": "Saint Peter's Courtyard",
-      "town": "Derby",
-      "operatorId": "ncp",
-      "lat": 52.92073,
-      "lng": -1.47863,
-      "radiusM": 120,
-      "siteType": "pay-and-display",
-      "maxStayMinutes": null,
-      "confidence": "medium",
-      "verified": false,
-      "source": "osm",
-      "osmRef": "way/33101534",
-      "notes": ""
-    },
-    {
       "id": "osm-way-331157194",
       "name": "Sainsbury's car park",
       "town": "",
@@ -32065,22 +32321,6 @@
       "notes": "OSM maxstay: 8 hours — operator untagged, enforcement unverified"
     },
     {
-      "id": "osm-way-344601284",
-      "name": "Tesco Express car park",
-      "town": "",
-      "operatorId": null,
-      "lat": 52.96419,
-      "lng": -1.30099,
-      "radiusM": 120,
-      "siteType": "customer-only",
-      "maxStayMinutes": null,
-      "confidence": "low",
-      "verified": false,
-      "source": "osm",
-      "osmRef": "way/344601284",
-      "notes": "Tesco store car park — commonly ANPR-enforced under contract"
-    },
-    {
       "id": "osm-way-344605028",
       "name": "Private car park",
       "town": "",
@@ -32351,22 +32591,6 @@
       "source": "osm",
       "osmRef": "way/35210767",
       "notes": ""
-    },
-    {
-      "id": "osm-way-352590420",
-      "name": "Lidl car park",
-      "town": "",
-      "operatorId": "athena",
-      "lat": 54.6479,
-      "lng": -6.75118,
-      "radiusM": 120,
-      "siteType": "customer-only",
-      "maxStayMinutes": null,
-      "confidence": "medium",
-      "verified": false,
-      "source": "osm",
-      "osmRef": "way/352590420",
-      "notes": "Lidl store car park — Lidl sites are widely managed by Athena ANPR"
     },
     {
       "id": "osm-way-353659673",
@@ -32981,7 +33205,7 @@
       "name": "NCP Montgomery Street",
       "town": "",
       "operatorId": "ncp",
-      "lat": 54.59683,
+      "lat": 54.59682,
       "lng": -5.92703,
       "radiusM": 120,
       "siteType": "pay-and-display",
@@ -33829,7 +34053,7 @@
       "name": "Asda car park",
       "town": "",
       "operatorId": null,
-      "lat": 51.44481,
+      "lat": 51.44479,
       "lng": -2.59486,
       "radiusM": 120,
       "siteType": "free-max-stay",
@@ -37103,6 +37327,22 @@
       "source": "osm",
       "osmRef": "way/4354364",
       "notes": "OSM maxstay: 5 hours — operator untagged, enforcement unverified"
+    },
+    {
+      "id": "osm-way-435555464",
+      "name": "Euro Car Parks car park",
+      "town": "",
+      "operatorId": "euro-car-parks",
+      "lat": 51.53438,
+      "lng": -2.54862,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/435555464",
+      "notes": ""
     },
     {
       "id": "osm-way-435719964",
@@ -42177,6 +42417,22 @@
       "notes": "Lidl store car park — Lidl sites are widely managed by Athena ANPR"
     },
     {
+      "id": "osm-way-553338135",
+      "name": "Aldi car park",
+      "town": "",
+      "operatorId": "parkingeye",
+      "lat": 51.74149,
+      "lng": -3.3764,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/553338135",
+      "notes": "Aldi store car park — Aldi sites are nationally managed by ParkingEye ANPR"
+    },
+    {
       "id": "osm-way-55337581",
       "name": "Long Stay",
       "town": "",
@@ -42481,6 +42737,22 @@
       "notes": "Aldi store car park — Aldi sites are nationally managed by ParkingEye ANPR · OSM maxstay: 1 hour"
     },
     {
+      "id": "osm-way-561273581",
+      "name": "Private car park",
+      "town": "",
+      "operatorId": null,
+      "lat": 54.51587,
+      "lng": -5.88844,
+      "radiusM": 120,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 150,
+      "confidence": "low",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/561273581",
+      "notes": "OSM maxstay: 2.5 hours — operator untagged, enforcement unverified"
+    },
+    {
       "id": "osm-way-561321012",
       "name": "Private car park",
       "town": "",
@@ -42718,7 +42990,7 @@
       "verified": false,
       "source": "osm",
       "osmRef": "way/565560903",
-      "notes": "Asda store car park — commonly ANPR-enforced under contract · OSM maxstay: 3 hour"
+      "notes": "Asda store car park — commonly ANPR-enforced under contract · OSM maxstay: 3 hours"
     },
     {
       "id": "osm-way-565562898",
@@ -43743,22 +44015,6 @@
       "source": "osm",
       "osmRef": "way/597868168",
       "notes": "OSM maxstay: 60 — operator untagged, enforcement unverified"
-    },
-    {
-      "id": "osm-way-59850731",
-      "name": "Oxford Street Car Park",
-      "town": "",
-      "operatorId": "q-park",
-      "lat": 51.51648,
-      "lng": -0.14504,
-      "radiusM": 120,
-      "siteType": "pay-and-display",
-      "maxStayMinutes": null,
-      "confidence": "medium",
-      "verified": false,
-      "source": "osm",
-      "osmRef": "way/59850731",
-      "notes": ""
     },
     {
       "id": "osm-way-598599993",
@@ -46289,6 +46545,22 @@
       "notes": "Aldi store car park — Aldi sites are nationally managed by ParkingEye ANPR"
     },
     {
+      "id": "osm-way-700286593",
+      "name": "Total Parking car park",
+      "town": "",
+      "operatorId": "total-parking",
+      "lat": 52.29535,
+      "lng": -1.08615,
+      "radiusM": 120,
+      "siteType": "pay-and-display",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/700286593",
+      "notes": ""
+    },
+    {
       "id": "osm-way-703324036",
       "name": "Aldi car park",
       "town": "",
@@ -46321,20 +46593,20 @@
       "notes": "Sainsbury's store car park — commonly ANPR-enforced under contract"
     },
     {
-      "id": "osm-way-70730411",
-      "name": "Babington Lane Car Park",
-      "town": "Derby",
-      "operatorId": "ncp",
-      "lat": 52.91793,
-      "lng": -1.47681,
+      "id": "osm-way-707057752",
+      "name": "Lidl Southampton car park",
+      "town": "",
+      "operatorId": "athena",
+      "lat": 50.933,
+      "lng": -1.46862,
       "radiusM": 120,
-      "siteType": "pay-and-display",
+      "siteType": "customer-only",
       "maxStayMinutes": null,
       "confidence": "medium",
       "verified": false,
       "source": "osm",
-      "osmRef": "way/70730411",
-      "notes": ""
+      "osmRef": "way/707057752",
+      "notes": "Lidl store car park — Lidl sites are widely managed by Athena ANPR"
     },
     {
       "id": "osm-way-708002940",
@@ -46737,6 +47009,22 @@
       "notes": "OSM maxstay: 60 — operator untagged, enforcement unverified"
     },
     {
+      "id": "osm-way-72925423",
+      "name": "Private car park",
+      "town": "",
+      "operatorId": null,
+      "lat": 52.81078,
+      "lng": -2.12147,
+      "radiusM": 120,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 120,
+      "confidence": "low",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/72925423",
+      "notes": "OSM maxstay: 2 hours — operator untagged, enforcement unverified"
+    },
+    {
       "id": "osm-way-730161639",
       "name": "Private car park",
       "town": "",
@@ -46870,7 +47158,7 @@
       "town": "",
       "operatorId": null,
       "lat": 51.43568,
-      "lng": -0.03419,
+      "lng": -0.03417,
       "radiusM": 120,
       "siteType": "customer-only",
       "maxStayMinutes": null,
@@ -46994,7 +47282,7 @@
     },
     {
       "id": "osm-way-754096694",
-      "name": "NCP car park",
+      "name": "National Car Parks car park",
       "town": "Newport",
       "operatorId": "ncp",
       "lat": 51.58785,
@@ -47186,7 +47474,7 @@
     },
     {
       "id": "osm-way-759459353",
-      "name": "Lidl Customer Car Park",
+      "name": "Lidl car park",
       "town": "Newport",
       "operatorId": "athena",
       "lat": 51.58395,
@@ -47202,7 +47490,7 @@
     },
     {
       "id": "osm-way-759459356",
-      "name": "Lidl Customer Car Park",
+      "name": "Lidl car park",
       "town": "Newport",
       "operatorId": "athena",
       "lat": 51.58454,
@@ -48305,6 +48593,22 @@
       "notes": "Tesco store car park — commonly ANPR-enforced under contract"
     },
     {
+      "id": "osm-way-81610469",
+      "name": "Tesco Car Park",
+      "town": "",
+      "operatorId": "horizon",
+      "lat": 54.622,
+      "lng": -1.56827,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/81610469",
+      "notes": ""
+    },
+    {
       "id": "osm-way-820238145",
       "name": "Morrisons car park",
       "town": "",
@@ -48350,6 +48654,22 @@
       "verified": false,
       "source": "osm",
       "osmRef": "way/82145442",
+      "notes": ""
+    },
+    {
+      "id": "osm-way-821789195",
+      "name": "Toby Carvery Parking",
+      "town": "",
+      "operatorId": "euro-car-parks",
+      "lat": 53.02487,
+      "lng": -2.19669,
+      "radiusM": 120,
+      "siteType": "customer-only",
+      "maxStayMinutes": null,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/821789195",
       "notes": ""
     },
     {
@@ -48719,22 +49039,6 @@
       "source": "osm",
       "osmRef": "way/83696465",
       "notes": "Tesco store car park — commonly ANPR-enforced under contract"
-    },
-    {
-      "id": "osm-way-837533055",
-      "name": "Babington Lane Forecourt",
-      "town": "Derby",
-      "operatorId": "ncp",
-      "lat": 52.9182,
-      "lng": -1.47734,
-      "radiusM": 120,
-      "siteType": "pay-and-display",
-      "maxStayMinutes": null,
-      "confidence": "medium",
-      "verified": false,
-      "source": "osm",
-      "osmRef": "way/837533055",
-      "notes": ""
     },
     {
       "id": "osm-way-838615839",
@@ -50005,8 +50309,8 @@
       "name": "Trinity Leeds Car Park",
       "town": "",
       "operatorId": "ncp",
-      "lat": 53.79515,
-      "lng": -1.54461,
+      "lat": 53.79516,
+      "lng": -1.54457,
       "radiusM": 120,
       "siteType": "pay-and-display",
       "maxStayMinutes": null,
@@ -50645,7 +50949,7 @@
       "name": "Aldi",
       "town": "",
       "operatorId": "parkingeye",
-      "lat": 53.84784,
+      "lat": 53.84785,
       "lng": -1.83519,
       "radiusM": 120,
       "siteType": "pay-and-display",
@@ -53201,6 +53505,22 @@
       "notes": "KFC car park — commonly ANPR-enforced under contract"
     },
     {
+      "id": "osm-way-945963522",
+      "name": "Beck Retail Park",
+      "town": "Wakefield",
+      "operatorId": "euro-car-parks",
+      "lat": 53.67801,
+      "lng": -1.49692,
+      "radiusM": 120,
+      "siteType": "free-max-stay",
+      "maxStayMinutes": 240,
+      "confidence": "medium",
+      "verified": false,
+      "source": "osm",
+      "osmRef": "way/945963522",
+      "notes": "OSM maxstay: 4 hours"
+    },
+    {
       "id": "osm-way-947267880",
       "name": "Tesco Express",
       "town": "",
@@ -53494,7 +53814,7 @@
       "town": "",
       "operatorId": "met-parking",
       "lat": 53.72469,
-      "lng": -2.32754,
+      "lng": -2.32755,
       "radiusM": 120,
       "siteType": "customer-only",
       "maxStayMinutes": null,
@@ -54565,8 +54885,8 @@
       "name": "NCP Belfast The Tannery",
       "town": "",
       "operatorId": "ncp",
-      "lat": 54.59986,
-      "lng": -5.93506,
+      "lat": 54.59987,
+      "lng": -5.93518,
       "radiusM": 120,
       "siteType": "pay-and-display",
       "maxStayMinutes": null,
@@ -55460,7 +55780,7 @@
   "attribution": "Contains data © OpenStreetMap contributors (ODbL). Operator attributions and stay terms are unverified — on-site signage is authoritative.",
   "stats": {
     "curated": 29,
-    "osm": 3440,
-    "importedAt": "2026-09-14T10:04:26.758Z"
+    "osm": 3460,
+    "importedAt": "2026-10-11T13:23:30.101Z"
   }
 }
