@@ -63,3 +63,11 @@ export function createDetector(sites) {
     },
   };
 }
+
+/** True when a fix is clearly outside the car park a session was started in.
+ *  Used to end a visit even if the detector was rebuilt since arrival (for
+ *  example after Android restarted the app in the background). */
+export function hasLeft(session, lat, lng) {
+  if (!session || typeof session.lat !== 'number' || typeof session.lng !== 'number') return false;
+  return haversineM(session.lat, session.lng, lat, lng) > (session.radiusM || 120) * EXIT_FACTOR;
+}

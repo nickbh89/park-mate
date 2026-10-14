@@ -469,7 +469,7 @@ export function splitTile([s, w, n, e]) {
  *  server, so when every attempt fails the tile is split into quadrants and
  *  each quadrant is tried on its own. Boxes
  *  that still fail are returned in `failed` instead of aborting the run. */
-const MAX_SPLIT_DEPTH = 1;
+const MAX_SPLIT_DEPTH = 2; // dense boxes (London) need sixteenths
 // Overall time budget for network work. Once it is spent, remaining boxes are
 // skipped (and their existing sites kept) so a bad day cannot run for hours.
 const RUN_BUDGET_MS = (Number(process.env.IMPORT_BUDGET_MINUTES) || 150) * 60 * 1000;
@@ -482,7 +482,7 @@ export async function fetchTile(buildQuery, tile, opts = {}, depth = 0) {
     return { elements: [], failed: [tile] };
   }
   try {
-    const data = await fetchOverpass(buildQuery(tile), { ...opts, attempts: depth === 0 ? 6 : 3 });
+    const data = await fetchOverpass(buildQuery(tile), { ...opts, attempts: depth === 0 ? 4 : 2 });
     return { elements: data.elements || [], failed: [] };
   } catch (e) {
     if (depth >= MAX_SPLIT_DEPTH) {
@@ -619,6 +619,8 @@ async function runTest(existing) {
   stamped[firstPlan[3].key] = '2026-10-04T12:00';
   const nextPlan = planTasks(stamped);
   assert(nextPlan[0].key === firstPlan[40].key && nextPlan[1].key === firstPlan[41].key && nextPlan[2].key === firstPlan[3].key, 'planTasks: never-refreshed jobs first, then the oldest');
+  const tried = { ...stamped, [firstPlan[40].key]: '2026-10-12T12:00' }; // tried but never completed
+  assert(planTasks(stamped, tried)[0].key === firstPlan[41].key && planTasks(stamped, tried).at(-1).key === firstPlan[40].key, 'planTasks: a box tried today goes to the back even if it never completed');
   assert(/area\.uk/.test(tileQueryAdjacent([49, -3, 50, 2])) && /area\.uk/.test(tileQueryOperators([49, -3, 50, 2])) && /area\.uk/.test(tileQueryMaxstay([49, -3, 50, 2])), 'all three queries filter to UK areas');
   await testFetchTile(assert);
   console.log(process.exitCode ? 'TESTS FAILED' : 'All import tests passed');
@@ -640,34 +642,35 @@ async function testFetchTile(assert) {
     console.error = quiet;
     assert(r1.elements.length === 4 && r1.failed.length === 0, 'fetchTile splits a failing tile and recovers via quadrants');
     console.error = () => {};
-    // everything 504s -> no throw, the 4 quadrants are reported failed
+    // everything 504s -> no throw, the 16 smallest boxes are reported failed
     const allFail = async () => ({ ok: false, status: 504 });
     const r2 = await fetchTile(tileQueryOperators, [49, -3, 50.5, 2], { fetchImpl: allFail, sleepImpl: noSleep });
     console.error = quiet;
-    assert(r2.elements.length === 0 && r2.failed.length === 4, 'fetchTile reports failed boxes instead of throwing');
+    assert(r2.elements.length === 0 && r2.failed.length === 16, 'fetchTile reports failed boxes instead of throwing');
     console.error = () => {};
     // HTTP 200 with a timeout remark is a failure, not an empty result
     const partial = async () => ({ ok: true, json: async () => ({ elements: [{ id: 1 }], remark: 'runtime error: Query timed out in "query" at line 3 after 121 seconds.' }) });
     const r3 = await fetchTile(tileQueryOperators, [49, -3, 50.5, 2], { fetchImpl: partial, sleepImpl: noSleep });
     console.error = quiet;
-    assert(r3.elements.length === 0 && r3.failed.length === 4, 'fetchOverpass rejects partial results that carry a timeout remark');
+    assert(r3.elements.length === 0 && r3.failed.length === 16, 'fetchOverpass rejects partial results that carry a timeout remark');
   } finally {
     console.error = quiet;
   }
 }
 
-/** Every (pass, tile) job, stalest first: jobs never completed come before any
- *  completed job, and among those the adjacent pass goes first. A run works
- *  down this list until the time budget is spent, so each run refreshes the
- *  areas that have waited longest and no area is starved by a slow day. */
-export function planTasks(refreshed = {}) {
+/** Every (pass, tile) job, stalest first by when it was last ATTEMPTED: jobs
+ *  never tried come before any tried job, and among those the adjacent pass
+ *  goes first. Ordering by attempt (not success) means a box that keeps coming
+ *  back partial still goes to the back of the queue, so areas further down the
+ *  list get their turn instead of being starved by it. */
+export function planTasks(refreshed = {}, attempted = refreshed) {
   const tasks = [
     ...TILES.flatMap(splitTile).map((tile) => ({ klass: 'adjacent', tile, build: tileQueryAdjacent })),
     ...TILES.map((tile) => ({ klass: 'operator', tile, build: tileQueryOperators })),
     ...TILES.map((tile) => ({ klass: 'maxstay', tile, build: tileQueryMaxstay })),
   ].map((t) => ({ ...t, key: `${t.klass}:${t.tile.join(',')}` }));
   // Array.prototype.sort is stable, so ties keep the order above.
-  return tasks.sort((a, b) => (refreshed[a.key] || '').localeCompare(refreshed[b.key] || ''));
+  return tasks.sort((a, b) => (attempted[a.key] || '').localeCompare(attempted[b.key] || ''));
 }
 
 /** One site per line: valid JSON, a fifth of the size of full pretty-printing,
@@ -685,7 +688,8 @@ async function main() {
   if (mode === '--test') return runTest(existing);
 
   const refreshed = { ...(existing.stats?.refreshed || {}) };
-  const tasks = planTasks(refreshed);
+  const attempted = { ...refreshed, ...(existing.stats?.attempted || {}) };
+  const tasks = planTasks(refreshed, attempted);
   const got = { operator: [], maxstay: [], adjacent: [] };
   const failed = { operator: [], maxstay: [], adjacent: [] };
   let done = 0;
@@ -693,7 +697,8 @@ async function main() {
   console.log(`Querying Overpass: ${tasks.length} jobs, stalest first (UK, Isle of Man, Channel Islands)…`);
   for (const [idx, task] of tasks.entries()) {
     if (budgetSpent()) { failed[task.klass].push(task.tile); skipped += 1; continue; }
-    console.log(`  ${idx + 1}/${tasks.length} ${task.klass} [${task.tile.join(', ')}] last refreshed ${refreshed[task.key] || 'never'}`);
+    console.log(`  ${idx + 1}/${tasks.length} ${task.klass} [${task.tile.join(', ')}] last refreshed ${refreshed[task.key] || 'never'}, last tried ${attempted[task.key] || 'never'}`);
+    attempted[task.key] = new Date().toISOString().slice(0, 16);
     const r = await fetchTile(task.build, task.tile);
     got[task.klass].push(...r.elements);
     failed[task.klass].push(...r.failed);
@@ -729,6 +734,7 @@ async function main() {
 
   const merged = merge(existing, [...confirmed, ...adjSites]);
   merged.stats.refreshed = Object.fromEntries(Object.entries(refreshed).sort());
+  merged.stats.attempted = Object.fromEntries(Object.entries(attempted).sort());
   console.log(`Merged database: ${merged.stats.curated} curated + ${merged.stats.osm} OSM = ${merged.sites.length} sites`);
 
   // Safety net: never publish a database that has lost a large share of its

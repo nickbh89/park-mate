@@ -4,8 +4,21 @@ import { Platform } from 'react-native';
 
 export const CHANNEL_ID = 'parkmate-alerts';
 
-export async function ensureNotificationSetup() {
-  if (Platform.OS === 'android') {
+// Show alerts even while ParkMate is the app on screen.
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
+
+/** Create the Android channel. Safe to call from the background: it never
+ *  shows a permission prompt. */
+export async function ensureChannel() {
+  if (Platform.OS !== 'android') return;
+  try {
     await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
       name: 'Parking alerts',
       importance: Notifications.AndroidImportance.MAX,
@@ -13,15 +26,12 @@ export async function ensureNotificationSetup() {
       vibrationPattern: [0, 400, 200, 400],
       enableVibrate: true,
     });
-  }
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowBanner: true,
-      shouldShowList: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-    }),
-  });
+  } catch {}
+}
+
+/** Channel plus the notification permission prompt. Call from the UI only. */
+export async function ensureNotificationSetup() {
+  await ensureChannel();
   const { status } = await Notifications.requestPermissionsAsync();
   return status === 'granted';
 }
@@ -35,7 +45,7 @@ export async function scheduleSessionReminders(plan) {
       // Fire immediately (entry alerts).
       const id = await Notifications.scheduleNotificationAsync({
         content: { title: titleFor(r.kind), body: r.message, sound: 'default' },
-        trigger: null,
+        trigger: Platform.OS === 'android' ? { channelId: CHANNEL_ID } : null,
       });
       ids.push(id);
     } else {

@@ -54,9 +54,38 @@ export function planSession(site, entryAt, opts = {}) {
       `(or within the operator's payment window).`);
   } else {
     push(entryAt, 'entry',
-      `Entered ${site.name} — privately enforced car park (${site.operatorName || 'operator unknown'}). Check the signage terms.`);
+      `Entered ${site.name} — privately enforced car park (${site.operatorName || 'operator unknown'}). ` +
+      `Check the sign, then tap its time limit in ParkMate to start a countdown.`);
   }
   return plan;
+}
+
+/** Time limits a driver can pick from when the database has none for a site. */
+export const LIMIT_CHOICES = [30, 60, 90, 120, 180, 240];
+
+/**
+ * The driver read the sign and told us the limit. startAt is the arrival time
+ * for a max-stay limit, or the moment of payment for a pay-and-display ticket.
+ * remembered = the limit came from the driver's earlier visit, so say so.
+ */
+export function planUserLimit(site, startAt, minutes, opts = {}) {
+  const alertLead = (opts.alertLeadMinutes ?? 15) * MIN;
+  const grace = (site.gracePeriodMinutes ?? opts.gracePeriodMinutes ?? 10) * MIN;
+  const now = opts.now ?? startAt;
+  const deadline = startAt + minutes * MIN;
+  const reminders = [];
+  const push = (at, kind, message) => { if (at >= now) reminders.push({ at, kind, message }); };
+  if (opts.remembered) {
+    push(startAt, 'entry',
+      `Entered ${site.name}. You set ${formatMins(minutes)} here last time — leave by ${fmtTime(deadline)}. Check the sign has not changed.`);
+  }
+  push(deadline - alertLead, 'pre-deadline',
+    `${formatMins(alertLead / MIN)} left at ${site.name}. Leave by ${fmtTime(deadline)} to avoid a parking charge.`);
+  push(deadline, 'deadline',
+    `Time is up at ${site.name}. Grace period (~${grace / MIN} min) — leave NOW.`);
+  push(deadline + grace, 'overstay',
+    `Grace period over at ${site.name}. A Parking Charge Notice is now likely.`);
+  return { siteId: site.id, entryAt: startAt, siteType: site.siteType, deadlineAt: deadline, hardLimitAt: deadline + grace, reminders };
 }
 
 /** For pay-and-display: user logged the expiry they bought. */

@@ -2,7 +2,7 @@ name: Update parking site database
 
 on:
   schedule:
-    - cron: '17 4 * * 1' # Mondays 04:17 UTC
+    - cron: '17 4 * * *' # daily 04:17 UTC, until every area has been covered
   workflow_dispatch: {}
 
 permissions:

@@ -2,10 +2,18 @@ import React from 'react';
 import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView, Linking } from 'react-native';
 
 export const KOFI_URL = 'https://ko-fi.com/nickbradshawhughes';
+const PACKAGE = 'com.nickbh89.parkmate';
+const PRIVACY_URL = 'https://parkmate.bhapps.co.uk/privacy.html';
+
+function openStoreListing() {
+  Linking.openURL(`market://details?id=${PACKAGE}`).catch(() => {
+    Linking.openURL(`https://play.google.com/store/apps/details?id=${PACKAGE}`).catch(() => {});
+  });
+}
 
 const LEAD_OPTIONS = [10, 15, 20, 30];
 
-export default function SettingsScreen({ settings, onChange, onBack }) {
+export default function SettingsScreen({ settings, onChange, onBack, onOpenHelp, onOpenHistory }) {
   return (
     <ScrollView style={styles.wrap} contentContainerStyle={{ padding: 20, paddingTop: 60 }}>
       <TouchableOpacity onPress={onBack}><Text style={styles.back}>‹ Back</Text></TouchableOpacity>
@@ -14,7 +22,7 @@ export default function SettingsScreen({ settings, onChange, onBack }) {
       <View style={styles.row}>
         <View style={{ flex: 1 }}>
           <Text style={styles.label}>Background detection</Text>
-          <Text style={styles.sub}>Detect car parks while the app is closed</Text>
+          <Text style={styles.sub}>Keep detecting with the app closed or the screen off. Android will ask you to allow location "all the time". Pause and start detection after changing this.</Text>
         </View>
         <Switch
           value={settings.backgroundEnabled}
@@ -46,6 +54,29 @@ export default function SettingsScreen({ settings, onChange, onBack }) {
         />
       </View>
 
+      <TouchableOpacity style={styles.linkRow} onPress={onOpenHistory}>
+        <Text style={styles.label}>Parking history</Text>
+        <Text style={styles.chev}>›</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.linkRow} onPress={onOpenHelp}>
+        <Text style={styles.label}>How ParkMate works</Text>
+        <Text style={styles.chev}>›</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.linkRow} onPress={() => Linking.openURL(PRIVACY_URL).catch(() => {})}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.label}>Privacy policy</Text>
+          <Text style={styles.sub}>Your location is processed on this device only and never sent to a server</Text>
+        </View>
+        <Text style={styles.chev}>›</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.linkRow, { marginBottom: 24 }]} onPress={openStoreListing}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.label}>Rate ParkMate</Text>
+          <Text style={styles.sub}>Leave a rating or review on Google Play</Text>
+        </View>
+        <Text style={styles.chev}>›</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity
         style={styles.tipBtn}
         onPress={() => Linking.openURL(KOFI_URL).catch(() => {})}
@@ -75,6 +106,8 @@ const styles = StyleSheet.create({
   leadBtnActive: { backgroundColor: '#22c55e' },
   leadText: { color: '#94a3b8', fontWeight: '600' },
   leadTextActive: { color: '#052e16' },
+  linkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#1e293b' },
+  chev: { color: '#475569', fontSize: 22, marginLeft: 10 },
   tipBtn: { backgroundColor: '#16233a', borderRadius: 12, padding: 16, marginTop: 4 },
   tipTitle: { color: '#e2e8f0', fontSize: 16, fontWeight: '700' },
   tipSub: { color: '#94a3b8', fontSize: 13, marginTop: 4 },
