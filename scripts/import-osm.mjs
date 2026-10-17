@@ -469,7 +469,7 @@ export function splitTile([s, w, n, e]) {
  *  server, so when every attempt fails the tile is split into quadrants and
  *  each quadrant is tried on its own. Boxes
  *  that still fail are returned in `failed` instead of aborting the run. */
-const MAX_SPLIT_DEPTH = 2; // dense boxes (London) need sixteenths
+const MAX_SPLIT_DEPTH = 3; // dense boxes (London, Edinburgh, Manchester) need 64ths of a quarter
 // Overall time budget for network work. Once it is spent, remaining boxes are
 // skipped (and their existing sites kept) so a bad day cannot run for hours.
 const RUN_BUDGET_MS = (Number(process.env.IMPORT_BUDGET_MINUTES) || 150) * 60 * 1000;
@@ -646,13 +646,13 @@ async function testFetchTile(assert) {
     const allFail = async () => ({ ok: false, status: 504 });
     const r2 = await fetchTile(tileQueryOperators, [49, -3, 50.5, 2], { fetchImpl: allFail, sleepImpl: noSleep });
     console.error = quiet;
-    assert(r2.elements.length === 0 && r2.failed.length === 16, 'fetchTile reports failed boxes instead of throwing');
+    assert(r2.elements.length === 0 && r2.failed.length === 64, 'fetchTile reports failed boxes instead of throwing');
     console.error = () => {};
     // HTTP 200 with a timeout remark is a failure, not an empty result
     const partial = async () => ({ ok: true, json: async () => ({ elements: [{ id: 1 }], remark: 'runtime error: Query timed out in "query" at line 3 after 121 seconds.' }) });
     const r3 = await fetchTile(tileQueryOperators, [49, -3, 50.5, 2], { fetchImpl: partial, sleepImpl: noSleep });
     console.error = quiet;
-    assert(r3.elements.length === 0 && r3.failed.length === 16, 'fetchOverpass rejects partial results that carry a timeout remark');
+    assert(r3.elements.length === 0 && r3.failed.length === 64, 'fetchOverpass rejects partial results that carry a timeout remark');
   } finally {
     console.error = quiet;
   }
